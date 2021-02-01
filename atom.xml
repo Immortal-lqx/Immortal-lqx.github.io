@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Immortal-lqx</title>
+  
+  <subtitle>Immortal-lqx</subtitle>
+  <link href="http://immortal-lqx.github.io/atom.xml" rel="self"/>
+  
+  <link href="http://immortal-lqx.github.io/"/>
+  <updated>2021-02-01T14:08:29.560Z</updated>
+  <id>http://immortal-lqx.github.io/</id>
+  
+  <author>
+    <name>Immortal-lqx</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>C++ Talk</title>
+    <link href="http://immortal-lqx.github.io/2021/02/01/c-talk/"/>
+    <id>http://immortal-lqx.github.io/2021/02/01/c-talk/</id>
+    <published>2021-02-01T14:04:11.000Z</published>
+    <updated>2021-02-01T14:08:29.560Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;C-小讲堂-8-21&quot;&gt;&lt;a href=&quot;#C-小讲堂-8-21&quot; class=&quot;headerlink&quot; title=&quot;C++小讲堂_8_21&quot;&gt;&lt;/a&gt;C++小讲堂_8_21&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;&lt;h3</summary>
+        
+      
+    
+    
+    
+    
+    <category term="C++" scheme="http://immortal-lqx.github.io/tags/C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="http://immortal-lqx.github.io/2021/02/01/hello-world/"/>
+    <id>http://immortal-lqx.github.io/2021/02/01/hello-world/</id>
+    <published>2021-02-01T13:37:47.524Z</published>
+    <updated>2021-02-01T03:43:52.000Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>today-plan</title>
+    <link href="http://immortal-lqx.github.io/2021/02/01/today-plan/"/>
+    <id>http://immortal-lqx.github.io/2021/02/01/today-plan/</id>
+    <published>2021-02-01T13:03:00.000Z</published>
+    <updated>2021-02-01T13:03:20.000Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;02-01-Plan&quot;&gt;&lt;a href=&quot;#02-01-Plan&quot; class=&quot;headerlink&quot; title=&quot;02/01 Plan&quot;&gt;&lt;/a&gt;02/01 Plan&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;&lt;font</summary>
+        
+      
+    
+    
+    
+    
+    <category term="plan" scheme="http://immortal-lqx.github.io/tags/plan/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>test_picture</title>
+    <link href="http://immortal-lqx.github.io/2021/02/01/test-picture/"/>
+    <id>http://immortal-lqx.github.io/2021/02/01/test-picture/</id>
+    <published>2021-02-01T12:27:47.000Z</published>
+    <updated>2021-02-01T12:58:58.000Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;测试图片显示&quot;&gt;&lt;a href=&quot;#测试图片显示&quot; class=&quot;headerlink&quot; title=&quot;测试图片显示&quot;&gt;&lt;/a&gt;测试图片显示&lt;/h1&gt;&lt;h2 id=&quot;test1&quot;&gt;&lt;a href=&quot;#test1&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="test" scheme="http://immortal-lqx.github.io/categories/test/"/>
+    
+    
+    <category term="test" scheme="http://immortal-lqx.github.io/tags/test/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ROS中nodelet的使用</title>
+    <link href="http://immortal-lqx.github.io/2021/02/01/ros-nodelet/"/>
+    <id>http://immortal-lqx.github.io/2021/02/01/ros-nodelet/</id>
+    <published>2021-02-01T12:00:34.000Z</published>
+    <updated>2021-02-01T12:15:30.000Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;ROS中nodelet的使用&quot;&gt;&lt;a href=&quot;#ROS中nodelet的使用&quot; class=&quot;headerlink&quot; title=&quot;ROS中nodelet的使用&quot;&gt;&lt;/a&gt;ROS中nodelet的使用&lt;/h1&gt;&lt;h2</summary>
+        
+      
+    
+    
+    
+    <category term="ROS的基本操作" scheme="http://immortal-lqx.github.io/categories/ROS%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/"/>
+    
+    
+    <category term="ROS" scheme="http://immortal-lqx.github.io/tags/ROS/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>test_top</title>
+    <link href="http://immortal-lqx.github.io/2020/09/07/test-top/"/>
+    <id>http://immortal-lqx.github.io/2020/09/07/test-top/</id>
+    <published>2020-09-07T01:25:00.000Z</published>
+    <updated>2021-02-01T12:58:22.000Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;test-top&quot;&gt;&lt;a href=&quot;#test-top&quot; class=&quot;headerlink&quot; title=&quot;test-top&quot;&gt;&lt;/a&gt;test-top&lt;/h1&gt;&lt;h2 id=&quot;test-picture&quot;&gt;&lt;a href=&quot;#test-picture&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Markdown" scheme="http://immortal-lqx.github.io/categories/Markdown/"/>
+    
+    
+    <category term="Typora" scheme="http://immortal-lqx.github.io/tags/Typora/"/>
+    
+    <category term="Markdown" scheme="http://immortal-lqx.github.io/tags/Markdown/"/>
+    
+  </entry>
+  
+</feed>
