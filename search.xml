@@ -344,24 +344,17 @@ rosrun nodelet nodelet load try_nodelet/try_use nodelet_manager __name:<span cla
     <title>today-plan</title>
     <url>/2021/02/01/today-plan/</url>
     <content><![CDATA[<h1 id="02-01-Plan"><a href="#02-01-Plan" class="headerlink" title="02/01 Plan"></a>02/01 Plan</h1><blockquote>
-<p><strong><font color="red">当一个人没有了监督，才能够显示其内心的向往是什么，是游戏人生？还是选择业余爱好，亦或者走上科研道路。</font></strong></p>
-<p><strong><font color="red">大学不会告诉你，这一切是你自己的选择！</font></strong></p>
+<p><strong><font color="red">w(ﾟДﾟ)w</font></strong></p>
 </blockquote>
 <h2 id="Week-Focus"><a href="#Week-Focus" class="headerlink" title="Week Focus:"></a>Week Focus:</h2><ul>
-<li><strong><font color="green">《离散数学》自学完毕（使用南京大学的资料）</font></strong></li>
-<li><strong><font color="green">《算法分析与设计》复习完毕，把没写完的习题写好，多练习一些算法题</font></strong></li>
-<li><strong><font color="green">学习《统计学习方法》，可以结合学长给的课件（注意：相关性可能不太大）</font></strong></li>
-<li><strong><font color="green">学习《视觉slam十四讲第二版》，以及深蓝学院的两个相关的课件和视频</font></strong></li>
-<li><strong><font color="green">学习ROS的几本电子书和深蓝学院的教程，重点是其中gazebo的使用，尤其是在gazebo下机械臂的构建和使用</font></strong></li>
-<li><strong><font color="pink">掌握PID控制算法（理论知识掌握后，研究一下如何实践）</font></strong></li>
-<li><strong><font color="pink">掌握正则表达式【顺延计划，务必完成！】</font></strong></li>
-<li><strong><font color="pink">掌握Python的基础语法（主要是一些很基础的语法，以后深度学习要用上的！）</font></strong></li>
-<li><strong><font color="pink">掌握卡尔曼滤波方面的知识</font></strong></li>
-<li><strong><font color="orange">尝试使用传统方法检测那个铁块，测试一下效果，虽然后期应该还是会用深度学习去做</font></strong></li>
-<li><strong><font color="orange">搭建一个博客（用gitee），并且开始写博客，把自己的一些知识笔记放到博客上面</font></strong></li>
-<li><strong><font color="fuchsia">复习巩固 OpenCV 【我居然没有圣经，一定要上网找本电子版的圣经过来！！！】</font></strong></li>
-<li><strong><font color="fuchsia">整理回顾所学的知识，整理写过的代码，推到github上，并且写一些博客、教程</font></strong></li>
-<li><strong><font color="fuchsia">整理好出国留学相关的资料，明确之后哪个时间段应该做什么</font></strong></li>
+<li><strong><font color="green">O(∩_∩)O哈！</font></strong></li>
+<li><strong><font color="green">QAQ</font></strong></li>
+<li><strong><font color="pink">JAVA</font></strong></li>
+<li><strong><font color="pink">C++</font></strong></li>
+<li><strong><font color="pink">Python</font></strong></li>
+<li><strong><font color="orange">github</font></strong></li>
+<li><strong><font color="orange">gitee</font></strong></li>
+<li><strong><font color="fuchsia">╭(╯^╰)╮</font></strong></li>
 </ul>
 <h2 id="Timetable"><a href="#Timetable" class="headerlink" title="Timetable:"></a>Timetable:</h2><table>
 <thead>
@@ -380,128 +373,21 @@ rosrun nodelet nodelet load try_nodelet/try_use nodelet_manager __name:<span cla
 </tr>
 <tr>
 <td><strong>08:00-08:30</strong></td>
-<td><strong><font color="green">认真的背六级词汇【V】</font></strong></td>
+<td><strong><font color="green">看新闻【V】</font></strong></td>
 </tr>
 <tr>
 <td><strong>08:30-09:00</strong></td>
-<td><strong><font color="green">认真的观看TED【V】</font></strong></td>
-</tr>
-<tr>
-<td><strong>09:00-10:00</strong></td>
-<td><strong><font color="blue">基地集训【看第六讲的视频并且同步的看完教材，争取都弄懂】</font></strong></td>
-</tr>
-<tr>
-<td><strong>10:00-11:00</strong></td>
-<td><strong><font color="blue">基地集训【看完第六讲的视频并且同步的看完教材，争取都弄懂】</font></strong></td>
-</tr>
-<tr>
-<td><strong>11:00-12:00</strong></td>
-<td><strong><font color="blue">基地集训【<font color="green">离散数学第一章节搞定&amp;学习第二章节</font>】</font></strong></td>
-</tr>
-<tr>
-<td><strong>12:00-12:45</strong></td>
-<td><strong>午餐</strong></td>
-</tr>
-<tr>
-<td><strong>12:45-13:45</strong></td>
-<td><strong><font color="green">学习离散数学【第二章节搞定大概一半】</font></strong></td>
-</tr>
-<tr>
-<td><strong>13:45-14:15</strong></td>
-<td><strong>午休</strong></td>
-</tr>
-<tr>
-<td><strong>14:30-15:30</strong></td>
-<td><strong><font color="blue">基地集训【第六讲的教材公式推证】</font></strong></td>
-</tr>
-<tr>
-<td><strong>15:30-16:30</strong></td>
-<td><strong><font color="blue">基地集训【第六讲的教材公式推证】</font></strong></td>
-</tr>
-<tr>
-<td><strong>16:30-17:30</strong></td>
-<td><strong><font color="blue">基地集训【第七讲的视频看完，同时把教材看一遍】</font></strong></td>
-</tr>
-<tr>
-<td><strong>17:30-18:30</strong></td>
-<td><strong><font color="orange">自行车环塔五公里</font></strong></td>
-</tr>
-<tr>
-<td><strong>18:30-19:00</strong></td>
-<td><strong>晚餐</strong></td>
-</tr>
-<tr>
-<td><strong>19:00-20:00</strong></td>
-<td><strong><font color="blue">基地集训【第七讲的视频看完，同时把教材看一遍】</font></strong></td>
-</tr>
-<tr>
-<td><strong>20:00-21:00</strong></td>
-<td><strong><font color="blue">基地集训【实现传统方法检测铁块，重点是确定传统方法可行性】</font></strong></td>
-</tr>
-<tr>
-<td><strong>21:00-22:00</strong></td>
-<td><strong><font color="green">复习《算法分析与设计》，课件和教材为主</font></strong></td>
-</tr>
-<tr>
-<td><strong>22:00-23:00</strong></td>
-<td><strong><font color="green">复习《算法分析与设计》，同步练习为主</font></strong></td>
-</tr>
-<tr>
-<td><strong>23:00-23:30</strong></td>
-<td><strong><font color="red">总结回顾，明日计划</font></strong></td>
-</tr>
-<tr>
-<td><strong>23:45</strong></td>
-<td><strong>休息</strong></td>
+<td><strong><font color="green">打游戏【V】</font></strong></td>
 </tr>
 </tbody></table>
 <h2 id="Check-List"><a href="#Check-List" class="headerlink" title="Check List:"></a>Check List:</h2><ul>
-<li><p><strong>英语学习拓展</strong></p>
-<ul>
-<li><input checked="" disabled="" type="checkbox"> <strong>六级单词记牢30个</strong></li>
-<li><input checked="" disabled="" type="checkbox"> <strong>TED视频看懂2个</strong></li>
-</ul>
-</li>
-<li><p><strong>视觉slam</strong></p>
-<ul>
-<li><input disabled="" type="checkbox"> <strong>第六讲搞定，弄懂</strong></li>
-<li><input disabled="" type="checkbox"> <strong>第七讲基本搞定，弄懂</strong></li>
-</ul>
-</li>
-<li><p><strong>离散数学</strong></p>
-<ul>
-<li><input disabled="" type="checkbox"> <strong>第一章剩下的教材和课件搞定</strong></li>
-<li><input disabled="" type="checkbox"> <strong>第二章的教材和课件搞定一半左右</strong></li>
-<li><input disabled="" type="checkbox"> <strong>好好的写例题，进行公式推证</strong></li>
-</ul>
-</li>
-<li><p><strong>算法分析与设计</strong></p>
-<ul>
-<li><input disabled="" type="checkbox"> <strong>开始第一章的学习，很基础，尽快弄完</strong></li>
-<li><input disabled="" type="checkbox"> <strong>直接往后学习第二章的内容，并且自己实现其中的算法</strong></li>
-<li><input disabled="" type="checkbox"> <strong>写课后的习题集，还有上洛谷做相关的题目</strong></li>
-</ul>
-</li>
-<li><p><strong>素质拓展</strong></p>
-<ul>
+<li><strong>素质拓展</strong><ul>
 <li><input checked="" disabled="" type="checkbox"> <strong>自行车环塔五公里</strong></li>
 <li><input checked="" disabled="" type="checkbox"> <strong>口琴练习《眉间雪》和《风动草》</strong></li>
 </ul>
 </li>
 </ul>
-<h2 id="Records："><a href="#Records：" class="headerlink" title="Records："></a>Records：</h2><ol>
-<li><p>上午有点不太想学slam，想搭建一个博客再学，但不知道博客要搭建多久。。。</p>
-</li>
-<li><p>从上午九点到下午大概三四点都在搭建博客，灰常兴奋</p>
-</li>
-<li><p>白天过的的很兴奋，一直在搭建自己的博客，一点点把功能实现出来，很爽然后其他的事情都没做o(<em>￣▽￣</em>)ブ</p>
-</li>
-<li><p>博客的搭建是一个长期的过程，一天必然做不完（废话），目前的打算如下：</p>
-<ol>
-<li>今天——从无到有，搭建本地静态博客，测试博客的撰写发布，时间足够的话就测试文章加密访问功能，以及更多的自定义样式</li>
-<li>明天——部署本地静态博客到github，并且尝试增加评论功能，熟悉一下网络搜索的开启和关闭，就是让自己可以很方便的确定是能够被谷歌和百度搜索到，还是不能被搜索到，只能通过网址进入。（明天学习为主，别再这么折腾了）</li>
-</ol>
-</li>
+<h2 id="Records："><a href="#Records：" class="headerlink" title="Records："></a>Records：</h2><ol start="5">
 <li><p>记住下面的官方最全示例，不过现在应该大致会用了</p>
 <pre class="line-numbers language-markdown" data-language="markdown"><code class="language-markdown"><span class="token front-matter-block"><span class="token punctuation">---</span>
 <span class="token font-matter yaml language-yaml">title: typora-vue-theme主题介绍
@@ -526,16 +412,11 @@ tags:
 </li>
 <li><p>简单尝试了一下看板娘，暂时不打算用了，一个是有奇怪的声音，一个是会挡字，有点不方便，并且有个通病，页面放大的同时看板娘也会放大，就很不好</p>
 </li>
-<li><p>友情链接有问题，有大问题，草。。。</p>
-</li>
-<li><p>好了好了，终于解决友情链接的问题了，并且小修小补了一下下，现在留言板和友情链接都算是没开发出来，待定</p>
-</li>
 <li><p>部署成功，开始密集测试！！！</p>
 </li>
 </ol>
-<h2 id="Notes"><a href="#Notes" class="headerlink" title="Notes:"></a>Notes:</h2><ol>
-<li></li>
-</ol>
+<h2 id="Notes"><a href="#Notes" class="headerlink" title="Notes:"></a>Notes:</h2><p><strong><font color="blue">好看的A2大姐姐(^o^)/~</font></strong></p>
+<p><img src="/images/A2.png"></p>
 ]]></content>
       <tags>
         <tag>plan</tag>
