@@ -6,7 +6,7 @@
   <link href="http://immortal-lqx.github.io/atom.xml" rel="self"/>
   
   <link href="http://immortal-lqx.github.io/"/>
-  <updated>2021-02-01T03:43:52.000Z</updated>
+  <updated>2021-02-01T16:28:17.163Z</updated>
   <id>http://immortal-lqx.github.io/</id>
   
   <author>
@@ -17,118 +17,51 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>Hello World</title>
-    <link href="http://immortal-lqx.github.io/2021/02/01/hello-world/"/>
-    <id>http://immortal-lqx.github.io/2021/02/01/hello-world/</id>
-    <published>2021-02-01T15:22:52.355Z</published>
-    <updated>2021-02-01T03:43:52.000Z</updated>
+    <title>创建指定OpenCV版本的ROS工程</title>
+    <link href="http://immortal-lqx.github.io/2020/12/19/chuang-jian-zhi-ding-opencv-ban-ben-ros-gong-cheng/"/>
+    <id>http://immortal-lqx.github.io/2020/12/19/chuang-jian-zhi-ding-opencv-ban-ben-ros-gong-cheng/</id>
+    <published>2020-12-19T09:33:56.000Z</published>
+    <updated>2021-02-01T16:28:17.163Z</updated>
     
     
       
       
         
         
-    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt;</summary>
+    <summary type="html">&lt;h1 id=&quot;创建指定OpenCV版本的ROS工程&quot;&gt;&lt;a href=&quot;#创建指定OpenCV版本的ROS工程&quot; class=&quot;headerlink&quot; title=&quot;创建指定OpenCV版本的ROS工程&quot;&gt;&lt;/a&gt;创建指定OpenCV版本的ROS工程&lt;/h1&gt;&lt;h3</summary>
         
       
     
     
     
+    <category term="计算机视觉" scheme="http://immortal-lqx.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/"/>
+    
+    
+    <category term="OpenCV" scheme="http://immortal-lqx.github.io/tags/OpenCV/"/>
+    
+    <category term="ROS" scheme="http://immortal-lqx.github.io/tags/ROS/"/>
     
   </entry>
   
   <entry>
-    <title>C++ Talk</title>
-    <link href="http://immortal-lqx.github.io/2021/02/01/c-talk/"/>
-    <id>http://immortal-lqx.github.io/2021/02/01/c-talk/</id>
-    <published>2021-02-01T14:04:11.000Z</published>
-    <updated>2021-02-01T14:08:29.560Z</updated>
+    <title>ROS中使用ddynamicReconfigure</title>
+    <link href="http://immortal-lqx.github.io/2020/09/05/ros-zhong-shi-yong-ddynamicreconfigure/"/>
+    <id>http://immortal-lqx.github.io/2020/09/05/ros-zhong-shi-yong-ddynamicreconfigure/</id>
+    <published>2020-09-05T07:41:44.000Z</published>
+    <updated>2021-02-01T16:23:45.464Z</updated>
     
     
       
       
         
         
-    <summary type="html">&lt;h1 id=&quot;C-小讲堂-8-21&quot;&gt;&lt;a href=&quot;#C-小讲堂-8-21&quot; class=&quot;headerlink&quot; title=&quot;C++小讲堂_8_21&quot;&gt;&lt;/a&gt;C++小讲堂_8_21&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;&lt;h3</summary>
+    <summary type="html">&lt;h1 id=&quot;ROS中使用ddynamicReconfigure&quot;&gt;&lt;a href=&quot;#ROS中使用ddynamicReconfigure&quot; class=&quot;headerlink&quot;</summary>
         
       
     
     
     
-    
-    <category term="C++" scheme="http://immortal-lqx.github.io/tags/C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>today-plan</title>
-    <link href="http://immortal-lqx.github.io/2021/02/01/today-plan/"/>
-    <id>http://immortal-lqx.github.io/2021/02/01/today-plan/</id>
-    <published>2021-02-01T13:03:00.000Z</published>
-    <updated>2021-02-01T14:39:39.995Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;02-01-Plan&quot;&gt;&lt;a href=&quot;#02-01-Plan&quot; class=&quot;headerlink&quot; title=&quot;02/01 Plan&quot;&gt;&lt;/a&gt;02/01 Plan&lt;/h1&gt;&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;&lt;font</summary>
-        
-      
-    
-    
-    
-    
-    <category term="plan" scheme="http://immortal-lqx.github.io/tags/plan/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>test_picture</title>
-    <link href="http://immortal-lqx.github.io/2021/02/01/test-picture/"/>
-    <id>http://immortal-lqx.github.io/2021/02/01/test-picture/</id>
-    <published>2021-02-01T12:27:47.000Z</published>
-    <updated>2021-02-01T12:58:58.000Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;测试图片显示&quot;&gt;&lt;a href=&quot;#测试图片显示&quot; class=&quot;headerlink&quot; title=&quot;测试图片显示&quot;&gt;&lt;/a&gt;测试图片显示&lt;/h1&gt;&lt;h2 id=&quot;test1&quot;&gt;&lt;a href=&quot;#test1&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="test" scheme="http://immortal-lqx.github.io/categories/test/"/>
-    
-    
-    <category term="test" scheme="http://immortal-lqx.github.io/tags/test/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>ROS中nodelet的使用</title>
-    <link href="http://immortal-lqx.github.io/2021/02/01/ros-nodelet/"/>
-    <id>http://immortal-lqx.github.io/2021/02/01/ros-nodelet/</id>
-    <published>2021-02-01T12:00:34.000Z</published>
-    <updated>2021-02-01T12:15:30.000Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;ROS中nodelet的使用&quot;&gt;&lt;a href=&quot;#ROS中nodelet的使用&quot; class=&quot;headerlink&quot; title=&quot;ROS中nodelet的使用&quot;&gt;&lt;/a&gt;ROS中nodelet的使用&lt;/h1&gt;&lt;h2</summary>
-        
-      
-    
-    
-    
-    <category term="ROS的基本操作" scheme="http://immortal-lqx.github.io/categories/ROS%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/"/>
+    <category term="ROS基础操作" scheme="http://immortal-lqx.github.io/categories/ROS%E5%9F%BA%E7%A1%80%E6%93%8D%E4%BD%9C/"/>
     
     
     <category term="ROS" scheme="http://immortal-lqx.github.io/tags/ROS/"/>
@@ -136,29 +69,102 @@
   </entry>
   
   <entry>
-    <title>test_top</title>
-    <link href="http://immortal-lqx.github.io/2020/09/07/test-top/"/>
-    <id>http://immortal-lqx.github.io/2020/09/07/test-top/</id>
-    <published>2020-09-07T01:25:00.000Z</published>
-    <updated>2021-02-01T12:58:22.000Z</updated>
+    <title>ROS中nodelet的使用</title>
+    <link href="http://immortal-lqx.github.io/2020/09/04/ros-zhong-nodelet-de-shi-yong/"/>
+    <id>http://immortal-lqx.github.io/2020/09/04/ros-zhong-nodelet-de-shi-yong/</id>
+    <published>2020-09-04T13:25:52.000Z</published>
+    <updated>2021-02-01T16:21:38.246Z</updated>
     
     
       
       
         
         
-    <summary type="html">&lt;h1 id=&quot;test-top&quot;&gt;&lt;a href=&quot;#test-top&quot; class=&quot;headerlink&quot; title=&quot;test-top&quot;&gt;&lt;/a&gt;test-top&lt;/h1&gt;&lt;h2 id=&quot;test-picture&quot;&gt;&lt;a href=&quot;#test-picture&quot;</summary>
+    <summary type="html">&lt;h1 id=&quot;ROS中nodelet的使用：&quot;&gt;&lt;a href=&quot;#ROS中nodelet的使用：&quot; class=&quot;headerlink&quot; title=&quot;ROS中nodelet的使用：&quot;&gt;&lt;/a&gt;ROS中nodelet的使用：&lt;/h1&gt;&lt;h2</summary>
         
       
     
     
     
-    <category term="Markdown" scheme="http://immortal-lqx.github.io/categories/Markdown/"/>
+    <category term="ROS基础操作" scheme="http://immortal-lqx.github.io/categories/ROS%E5%9F%BA%E7%A1%80%E6%93%8D%E4%BD%9C/"/>
     
     
-    <category term="Typora" scheme="http://immortal-lqx.github.io/tags/Typora/"/>
+    <category term="ROS" scheme="http://immortal-lqx.github.io/tags/ROS/"/>
     
-    <category term="Markdown" scheme="http://immortal-lqx.github.io/tags/Markdown/"/>
+  </entry>
+  
+  <entry>
+    <title>C++描述符delete与override</title>
+    <link href="http://immortal-lqx.github.io/2020/08/21/delete-yu-override/"/>
+    <id>http://immortal-lqx.github.io/2020/08/21/delete-yu-override/</id>
+    <published>2020-08-21T12:33:44.000Z</published>
+    <updated>2021-02-01T16:12:36.372Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;delete与override&quot;&gt;&lt;a href=&quot;#delete与override&quot; class=&quot;headerlink&quot; title=&quot;delete与override&quot;&gt;&lt;/a&gt;delete与override&lt;/h1&gt;&lt;h2</summary>
+        
+      
+    
+    
+    
+    <category term="C++基础知识" scheme="http://immortal-lqx.github.io/categories/C-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
+    
+    
+    <category term="C++" scheme="http://immortal-lqx.github.io/tags/C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>类的六个默认的成员函数</title>
+    <link href="http://immortal-lqx.github.io/2020/08/21/lei-de-liu-ge-mo-ren-de-cheng-yuan-han-shu/"/>
+    <id>http://immortal-lqx.github.io/2020/08/21/lei-de-liu-ge-mo-ren-de-cheng-yuan-han-shu/</id>
+    <published>2020-08-21T11:21:30.000Z</published>
+    <updated>2021-02-01T16:17:48.475Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;类的六个默认的成员函数&quot;&gt;&lt;a href=&quot;#类的六个默认的成员函数&quot; class=&quot;headerlink&quot; title=&quot;类的六个默认的成员函数&quot;&gt;&lt;/a&gt;类的六个默认的成员函数&lt;/h1&gt;&lt;h2 id=&quot;类的6个默认的成员函数包括：&quot;&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="C++基础知识" scheme="http://immortal-lqx.github.io/categories/C-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
+    
+    
+    <category term="C++" scheme="http://immortal-lqx.github.io/tags/C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>几种常见的颜色空间</title>
+    <link href="http://immortal-lqx.github.io/2020/08/17/colorspace/"/>
+    <id>http://immortal-lqx.github.io/2020/08/17/colorspace/</id>
+    <published>2020-08-17T08:24:46.000Z</published>
+    <updated>2021-02-01T16:10:36.077Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;颜色空间&quot;&gt;&lt;a href=&quot;#颜色空间&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="计算机视觉" scheme="http://immortal-lqx.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/"/>
+    
+    
+    <category term="OpenCV" scheme="http://immortal-lqx.github.io/tags/OpenCV/"/>
     
   </entry>
   
