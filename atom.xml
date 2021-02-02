@@ -62,9 +62,9 @@
     <category term="计算机视觉" scheme="http://immortal-lqx.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/"/>
     
     
-    <category term="OpenCV" scheme="http://immortal-lqx.github.io/tags/OpenCV/"/>
-    
     <category term="ROS" scheme="http://immortal-lqx.github.io/tags/ROS/"/>
+    
+    <category term="OpenCV" scheme="http://immortal-lqx.github.io/tags/OpenCV/"/>
     
   </entry>
   
