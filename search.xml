@@ -205,6 +205,129 @@ rosrun nodelet nodelet load try_nodelet/try_use nodelet_manager __name:<span cla
       </tags>
   </entry>
   <entry>
+    <title>ROS中使用ddynamicReconfigure</title>
+    <url>/2020/09/05/ros-zhong-shi-yong-ddynamicreconfigure/</url>
+    <content><![CDATA[<h1 id="ROS中使用ddynamicReconfigure"><a href="#ROS中使用ddynamicReconfigure" class="headerlink" title="ROS中使用ddynamicReconfigure"></a>ROS中使用ddynamicReconfigure</h1><h2 id="关于ddynamicReconfigure类"><a href="#关于ddynamicReconfigure类" class="headerlink" title="关于ddynamicReconfigure类"></a>关于ddynamicReconfigure类</h2><p>The DDynamicReconfigure class allows to use ROS dynamic reconfigure without the need to write a custom cpf file, <strong>variables are registered and exposed at run time</strong>.  Modification of the variables is done through a variable pointer or through a callback function.</p>
+<p>The <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> class is the main class responsible for keeping track of parameters basic properties, values, descriptions, etc. </p>
+<p>It is also responsible of handling callbacks, config change requests, description setup and config setup, and the ROS publishers and  services.</p>
+<p>To operate a DDynamic instance, you must go through the following procedure:</p>
+<ol>
+<li>Construct a <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> instance with proper handling.</li>
+<li>Add parameters to the instance as needed with any of the “add” methods.</li>
+<li>Start the ROS services with any of the “start” methods.</li>
+<li>If you need to change the callback after startup you may do so using “setCallback”.</li>
+<li>When you need to get any of the stored parameters, call either “get” or “at” on this instance, rather than through the callback. </li>
+</ol>
+<h2 id="常用函数原型-amp-解析"><a href="#常用函数原型-amp-解析" class="headerlink" title="常用函数原型&amp;解析"></a>常用函数原型&amp;解析</h2><p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p>
+<p>When a change is made, <strong>it will be reflected in the variable directly.</strong></p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;
+  void registerVariable(
+  const std::string &amp;name, 
+  T *variable,
+  const std::string &amp;description = "", 
+  T min = getMin&lt;T&gt;(), 
+  T max = getMax&lt;T&gt;()
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;
+  void registerEnumVariable(
+  const std::string &amp;name, 
+  T *variable,
+  const std::string &amp;description = "",
+  std::map&lt;std::string, T&gt; enum_dict = {},
+  const std::string &amp;enum_description = ""
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<hr>
+<p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p>
+<p>When a change is made, <strong>the callback will be called with the new value.</strong></p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
+  void registerVariable(
+  const std::string &amp;name, 
+  T current_value,
+  const boost::function&lt;void(T value)&gt; &amp;callback,
+  const std::string &amp;description = "", 
+  T min = getMin&lt;T&gt;(), 
+  T max = getMax&lt;T&gt;()
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
+  void registerEnumVariable(
+  const std::string &amp;name, 
+  T current_value,
+  const boost::function&lt;void(T)&gt; &amp;callback,
+  const std::string &amp;description,
+  std::map&lt;std::string, T&gt; enum_dict = {},
+  const std::string &amp;enum_description = ""
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<hr>
+<p>publishServicesTopics <strong>starts the server</strong> once all the needed variables are registered.</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">void publishServicesTopics();<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>关于getMin()与getMax()</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
+inline T getMin()
+{
+  return std::numeric_limits&lt;T&gt;::min();
+}
+
+template &lt;&gt;
+inline bool getMin()
+{
+  return false;
+}
+
+template &lt;&gt;
+inline std::string getMin&lt;std::string&gt;()
+{
+  return "";
+}
+
+template &lt;typename T&gt;
+inline T getMax()
+{
+  return std::numeric_limits&lt;T&gt;::min();
+}
+
+template &lt;&gt;
+inline bool getMax()
+{
+  return true;
+}
+
+template &lt;&gt;
+inline std::string getMax()
+{
+  return "";
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="简单示例"><a href="#简单示例" class="headerlink" title="简单示例"></a>简单示例</h2><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;ros/ros.h&gt;
+#include &lt;ddynamic_reconfigure/ddynamic_reconfigure.h&gt;
+
+int global_int;
+
+void paramCb(int new_value)
+{
+   global_int = new_value;
+   ROS_INFO("Param modified: %d", global_int);
+}
+
+int main(int argc, char **argv) {
+    // ROS init stage
+    ros::init(argc, argv, "ddynamic_tutorials");
+    ros::NodeHandle nh;
+    ddynamic_reconfigure::DDynamicReconfigure ddr;
+    
+    ddr.registerVariable&lt;int&gt;("int_param",124, boost::bind(paramCb, _1), "param description",-1000,2357);
+    ddr.publishServicesTopics();
+    // Now parameter can be modified from the dynamic_reconfigure GUI or other tools and the callback is called on each update
+    ros::spin();
+    return 0;
+ }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+]]></content>
+      <categories>
+        <category>ROS基础操作</category>
+      </categories>
+      <tags>
+        <tag>ROS</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>C++描述符delete与override</title>
     <url>/2020/08/21/delete-yu-override/</url>
     <content><![CDATA[<h1 id="delete与override"><a href="#delete与override" class="headerlink" title="delete与override"></a>delete与override</h1><h2 id="优先使用delete关键字删除函数而非private却又不实现的函数"><a href="#优先使用delete关键字删除函数而非private却又不实现的函数" class="headerlink" title="优先使用delete关键字删除函数而非private却又不实现的函数"></a>优先使用delete关键字删除函数而非private却又不实现的函数</h2><h3 id="为什么使用delete？"><a href="#为什么使用delete？" class="headerlink" title="为什么使用delete？"></a>为什么使用delete？</h3><p>​    不想让别的开发者调用特定的函数,你只需要不声明这个函数就可以了。但有时候 C++为你声明了一些函数,如果你想阻止客户调用这些函数,就不是那么容易的事了。</p>
@@ -363,129 +486,6 @@ public:
       </categories>
       <tags>
         <tag>C++</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>ROS中使用ddynamicReconfigure</title>
-    <url>/2020/09/05/ros-zhong-shi-yong-ddynamicreconfigure/</url>
-    <content><![CDATA[<h1 id="ROS中使用ddynamicReconfigure"><a href="#ROS中使用ddynamicReconfigure" class="headerlink" title="ROS中使用ddynamicReconfigure"></a>ROS中使用ddynamicReconfigure</h1><h2 id="关于ddynamicReconfigure类"><a href="#关于ddynamicReconfigure类" class="headerlink" title="关于ddynamicReconfigure类"></a>关于ddynamicReconfigure类</h2><p>The DDynamicReconfigure class allows to use ROS dynamic reconfigure without the need to write a custom cpf file, <strong>variables are registered and exposed at run time</strong>.  Modification of the variables is done through a variable pointer or through a callback function.</p>
-<p>The <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> class is the main class responsible for keeping track of parameters basic properties, values, descriptions, etc. </p>
-<p>It is also responsible of handling callbacks, config change requests, description setup and config setup, and the ROS publishers and  services.</p>
-<p>To operate a DDynamic instance, you must go through the following procedure:</p>
-<ol>
-<li>Construct a <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> instance with proper handling.</li>
-<li>Add parameters to the instance as needed with any of the “add” methods.</li>
-<li>Start the ROS services with any of the “start” methods.</li>
-<li>If you need to change the callback after startup you may do so using “setCallback”.</li>
-<li>When you need to get any of the stored parameters, call either “get” or “at” on this instance, rather than through the callback. </li>
-</ol>
-<h2 id="常用函数原型-amp-解析"><a href="#常用函数原型-amp-解析" class="headerlink" title="常用函数原型&amp;解析"></a>常用函数原型&amp;解析</h2><p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p>
-<p>When a change is made, <strong>it will be reflected in the variable directly.</strong></p>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;
-  void registerVariable(
-  const std::string &amp;name, 
-  T *variable,
-  const std::string &amp;description = "", 
-  T min = getMin&lt;T&gt;(), 
-  T max = getMax&lt;T&gt;()
-  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;
-  void registerEnumVariable(
-  const std::string &amp;name, 
-  T *variable,
-  const std::string &amp;description = "",
-  std::map&lt;std::string, T&gt; enum_dict = {},
-  const std::string &amp;enum_description = ""
-  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<hr>
-<p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p>
-<p>When a change is made, <strong>the callback will be called with the new value.</strong></p>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
-  void registerVariable(
-  const std::string &amp;name, 
-  T current_value,
-  const boost::function&lt;void(T value)&gt; &amp;callback,
-  const std::string &amp;description = "", 
-  T min = getMin&lt;T&gt;(), 
-  T max = getMax&lt;T&gt;()
-  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
-  void registerEnumVariable(
-  const std::string &amp;name, 
-  T current_value,
-  const boost::function&lt;void(T)&gt; &amp;callback,
-  const std::string &amp;description,
-  std::map&lt;std::string, T&gt; enum_dict = {},
-  const std::string &amp;enum_description = ""
-  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<hr>
-<p>publishServicesTopics <strong>starts the server</strong> once all the needed variables are registered.</p>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">void publishServicesTopics();<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>关于getMin()与getMax()</p>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
-inline T getMin()
-{
-  return std::numeric_limits&lt;T&gt;::min();
-}
-
-template &lt;&gt;
-inline bool getMin()
-{
-  return false;
-}
-
-template &lt;&gt;
-inline std::string getMin&lt;std::string&gt;()
-{
-  return "";
-}
-
-template &lt;typename T&gt;
-inline T getMax()
-{
-  return std::numeric_limits&lt;T&gt;::min();
-}
-
-template &lt;&gt;
-inline bool getMax()
-{
-  return true;
-}
-
-template &lt;&gt;
-inline std::string getMax()
-{
-  return "";
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="简单示例"><a href="#简单示例" class="headerlink" title="简单示例"></a>简单示例</h2><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;ros/ros.h&gt;
-#include &lt;ddynamic_reconfigure/ddynamic_reconfigure.h&gt;
-
-int global_int;
-
-void paramCb(int new_value)
-{
-   global_int = new_value;
-   ROS_INFO("Param modified: %d", global_int);
-}
-
-int main(int argc, char **argv) {
-    // ROS init stage
-    ros::init(argc, argv, "ddynamic_tutorials");
-    ros::NodeHandle nh;
-    ddynamic_reconfigure::DDynamicReconfigure ddr;
-    
-    ddr.registerVariable&lt;int&gt;("int_param",124, boost::bind(paramCb, _1), "param description",-1000,2357);
-    ddr.publishServicesTopics();
-    // Now parameter can be modified from the dynamic_reconfigure GUI or other tools and the callback is called on each update
-    ros::spin();
-    return 0;
- }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-]]></content>
-      <categories>
-        <category>ROS基础操作</category>
-      </categories>
-      <tags>
-        <tag>ROS</tag>
       </tags>
   </entry>
   <entry>
