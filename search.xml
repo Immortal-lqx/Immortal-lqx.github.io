@@ -1,184 +1,1002 @@
 <?xml version="1.0" encoding="utf-8"?>
-<search> 
-  
-  
-    
-    <entry>
-      <title>视觉SLAM十四讲笔记</title>
-      <link href="2021/01/27/shi-jue-slam-shi-si-jiang-bi-ji/"/>
-      <url>2021/01/27/shi-jue-slam-shi-si-jiang-bi-ji/</url>
-      
-        <content type="html"><![CDATA[<h1 id="《视觉SLAM十四讲》笔记"><a href="#《视觉SLAM十四讲》笔记" class="headerlink" title="《视觉SLAM十四讲》笔记"></a>《视觉SLAM十四讲》笔记</h1><h2 id="第一、二讲-初识SLAM"><a href="#第一、二讲-初识SLAM" class="headerlink" title="第一、二讲    初识SLAM"></a>第一、二讲    <code>初识SLAM</code></h2><h3 id="一、知识总结"><a href="#一、知识总结" class="headerlink" title="一、知识总结"></a>一、知识总结</h3><ol><li><p>slam英文为Simultaneous Localization and Mapping，意思是同时定位与建图。它指搭建特定的传感器的主体，在没有环境先验信息的情况下，在运动过程中建立环境的模型，同时估计自己的运动。当传感器主要为相机时，可称为‘视觉slam’。</p></li><li><p>slam技术应用在机器人定位导航，AR/VR、三feixianxingyouhua维重建等领域。</p></li><li><p>slam框架主要包括传感器信息读取、视觉里程计、后端优化、建图以及回环检测五部分。</p><p><img src="/images/slam-notes/1.png"></p><ul><li>传感器信息的读取：主要为图像信息的读取和预处理。以及其他传感器如惯性传感器信息的读取和处理</li><li>视觉里程计：估计相邻图像间的运动。单独的vo存在累计漂移问题。</li><li>后端优化：对相机位姿和回环检测的信息进行优化，采用滤波和非线性优化方法，解决在带有噪声的数据中，估计整个系统的状态，以及状态估计的不确定性。目的是得到全局一致的轨迹和地图。</li><li>建图：目的是解决位置估计随时间漂移的问题，建立与任务对应的地图。需要使机器人识别曾经到达过的场景的能力。如判断图像间相似性来完成回环检测。分为度量地图和拓扑地图。</li></ul></li><li><p>拓扑地图：强调地图元素的关系，由节点和边组成，只考虑节点的联通性。</p></li><li><p>度量地图：强调精确地表示地图中物体的位置关系，用稀疏和稠密对它们进行分类。二维度量地图是许多个小格子组成，三维是方块。包括占据、空闲以及未知三种状态。</p></li></ol><h3 id="二、数学表述"><a href="#二、数学表述" class="headerlink" title="二、数学表述"></a>二、数学表述</h3><ol><li>运动方程</li></ol><p><img src="/images/slam-notes/2.png"></p><ol start="2"><li><p>观测方程</p><p><img src="/images/slam-notes/3.png"></p></li><li><p>符号意义x为机器人各时刻位置,y为路标，u为传感器的输入数据，w、v为噪声。z为观测数据。机器人在环境中移动可以描述为运动方程和观测方程，转化为求解定位x和建图y的问题。问题建模为一个状态估计问题。</p></li></ol><h2 id="第三讲-三维空间刚体运动"><a href="#第三讲-三维空间刚体运动" class="headerlink" title="第三讲    三维空间刚体运动"></a>第三讲    <code>三维空间刚体运动</code></h2><ol><li><p>内积：描述向量间的投影关系<br><img src="/images/slam-notes/4.png"></p></li><li><p>外积：外积的方向垂直a、b两个向量，大小为|a||b|sin&lt;a, b&gt;</p></li><li><p>它是两个向量张成的四边形的有向面积。外积只对三维向量存在定义，可以表示旋转^表示反对称符号，外积公式：<br><img src="/images/slam-notes/5.png"></p></li><li><p>欧氏变换：同一个向量在各个坐标系下的长度和夹角都不会发生变换，称为欧氏变换。</p></li><li><p>旋转矩阵：描述了旋转本身。它是行列式为1的正交矩阵。SO表示特殊正交群，集合定义如下：<br><img src="/images/slam-notes/6.png"></p></li><li><p>世界坐标系下向量a经过旋转R和平移t到a’描述一个欧氏空间完的变换关系。<br><img src="/images/slam-notes/7.png"></p></li><li><p>变换矩阵和齐次坐标是使用数学技巧，把转换关系变为线性关系。变换矩阵为特殊欧氏群，表示为：</p><p><img src="/images/slam-notes/8.png"></p></li><li><p>欧拉角：把一个旋转分解成三次绕不同轴的旋转。使用前要定义方向，如：偏航-俯仰-滚转等价于ZYX旋转。</p><p>欧拉角的一个重大缺点是会碰到著名的万向锁问题（Gimbal Lock）：在俯仰角为 ±90◦ 时，第一次旋转与第三次旋转将使用同一个轴，使得系统丢失了一个自由度（由三次 旋转变成了两次旋转）。这被称为奇异性问题，在其他形式的欧拉角中也同样存在。</p><p><img src="/images/slam-notes/9.png"></p><p>俯仰角在±90°时欧拉角出现万向锁的过程：</p><p>​    假设旋转顺序是 xyz，    </p><p>​    第一次绕x轴旋转，得到 xy’z’</p><p>​    第二次绕y’轴旋转90度，得到 x’y’z’’</p><p>​    由于y’旋转了90度，导致z’’与 x同轴了，这样在z’’上的旋转等价于最初在x上的旋转。</p><p>​    相当于这一次的 xyz操作，可以简化为 xy. 我们将这个现象称为 万向锁。</p></li><li><p>旋转向量：使用方向与旋转轴n一致，长度等于旋转角的向量θ称为旋转向量，相比旋转矩阵更加紧凑，维数为6维。旋转矩阵和旋转向量之间的公式叫罗德里格斯，转换公式如下：<br><img src="/images/slam-notes/10.png"></p><blockquote><p> 符号 ∧ 是向量到反对称的转换符</p></blockquote></li><li><p>四元数q:用复数的乘法表示旋转，紧凑的，没有奇异性。性质：一个模长为1的复数，可表示复平面的纯旋转；任意的旋转都可以用互为相反数的四元数表示；满足一定的运算。<br>  公式表达如下：<br>  <img src="/images/slam-notes/11.png"></p><p>其中 i, j, k 为四元数的三个虚部。这三个虚部满足关系式：</p><p><img src="/images/slam-notes/12.png"></p></li><li><p>用四元数表示旋转：</p><p><img src="/images/slam-notes/a.png"></p></li><li><p>各种描述之间的转换</p><p><img src="/images/slam-notes/b.png"></p></li></ol><h2 id="第四讲-李群与李代数"><a href="#第四讲-李群与李代数" class="headerlink" title="第四讲    李群与李代数"></a>第四讲    <code>李群与李代数</code></h2><h3 id="一、李群"><a href="#一、李群" class="headerlink" title="一、李群"></a>一、李群</h3><p>群（Group）是一种集合加上一种运算的代数结构。我们把集合记作 A，运算记作 ·， 那么群可以记作 G = (A, ·)。群要求这个运算满足以下几个条件：</p><p><img src="/images/slam-notes/15.png"></p><p>矩阵中常见的群有：</p><p>一般线性群 GL(n) 指 n × n 的可逆矩阵，它们对矩阵乘法成群。</p><p>特殊正交群 SO(n) 也就是所谓的旋转矩阵群，其中 SO(2) 和 SO(3) 最为常见。</p><p>特殊欧氏群 SE(n) 也就是前面提到的 n 维欧氏变换，如 SE(2) 和 SE(3)。</p><p><strong>李群</strong>是指具有连续（光滑）性质的群。像整数群 Z 那样离散的群没有连续性质，所以不是李群。而 SO(n) 和 SE(n)，它们在实数空间上是连续的。我们能够直观地想象一个刚体能够连续地在空间中运动，所以它们都是李群。</p><p><img src="/images/slam-notes/16.png"></p><h3 id="二、李代数"><a href="#二、李代数" class="headerlink" title="二、李代数"></a>二、李代数</h3><p>每个李群都有与之对应的李代数。李代数描述了李群的局部性质。通用的李代数的定义如下：</p><p>李代数由一个集合 V，一个数域 F 和一个二元运算 [, ] 组成。如果它们满足以下几条 性质，称 (V, F, [, ]) 为一个李代数，记作 g。</p><p><img src="/images/slam-notes/17.png"></p><p>其中二元运算被称为李括号。</p><h4 id="2-1-李群SO-3-的李代数so-3"><a href="#2-1-李群SO-3-的李代数so-3" class="headerlink" title="2.1 李群SO(3)的李代数so(3)"></a>2.1 李群SO(3)的李代数so(3)</h4><p><img src="/images/slam-notes/c.png"></p><h4 id="2-2-李群SE-3-的李代数se-3"><a href="#2-2-李群SE-3-的李代数se-3" class="headerlink" title="2.2 李群SE(3)的李代数se(3)"></a>2.2 李群SE(3)的李代数se(3)</h4><p><img src="/images/slam-notes/d.png"></p><h3 id="三、指数与对数映射"><a href="#三、指数与对数映射" class="headerlink" title="三、指数与对数映射"></a>三、指数与对数映射</h3><p>指数映射反映了从李代数到李群的对应关系：<code>R=exp(ϕ^)</code></p><p>由于 <code>ϕ</code> 是向量，定义其角度和模长：</p><p>​    角度乘单位向量：<code>ϕ=θa</code></p><p>​    关于 <code>a</code> ，可以验证以下性质：</p><p><img src="/images/slam-notes/19.png">    </p><p>​    <img src="/images/slam-notes/20.png"></p><p>Taylor展开：</p><p><img src="/images/slam-notes/21.png"></p><p>结果：（对比之前的罗德里格斯公式）</p><p><img src="/images/slam-notes/22.png"></p><p><strong>SO(3)上的指数映射</strong></p><p><img src="/images/slam-notes/23.png"></p><p><strong>SE(3)上的指数映射</strong></p><p><img src="/images/slam-notes/24.png"></p><p><img src="/images/slam-notes/25.png"></p><p><strong>SO(3), SE(3), so(3), se(3) 的对应关系</strong></p><p><img src="/images/slam-notes/26.png"></p><h2 id="第五讲-相机与图像"><a href="#第五讲-相机与图像" class="headerlink" title="第五讲    相机与图像"></a>第五讲    <code>相机与图像</code></h2><h3 id="一、相机"><a href="#一、相机" class="headerlink" title="一、相机"></a>一、相机</h3><p>相机主要分为单目（Monocular）、双目(Stereo)、深度相机(RGB-D)三类。</p><ol><li>单目相机：是三维空间的二维投影，可以用来估计相机运动和结构（场景的大小和远近）。<br>原理是近处的物体移动的快、远处的物体移动慢，相机运动可以形成视差。<br>优点：成本低；<br>缺点：尺度不确定性，无法估计物体的真实尺度。例如相机的运动和场景同时放大两倍，单目所看到的像是一样的。</li><li>双目相机：基线（两个相机间的距离）来估计每个像素的空间位置。基线越大，测量的物体越远。<br>优点：解决了尺度不确定性。<br>缺点：深度量程和精度受双目的基线和分辨率限制；视差的计算消耗计算资源。</li><li>深度相机：通过红外结构光或Time-of-Fligfeixianxingyouhuaht(ToF)原理，用物理方法测量物体的距离。<br>优点：相比双目节省计算量。<br>缺点：测量范围窄、噪声大、视野小、易受日光干扰、无法测量透射材料等</li></ol><h3 id="二、坐标系"><a href="#二、坐标系" class="headerlink" title="二、坐标系"></a>二、坐标系</h3><ul><li><p>世界坐标</p><ul><li>也就是真实世界的立体空间坐标，是一个三维坐标系</li><li><em>Ow-XwYwZw</em>：世界坐标系,描述相机位置,单位m</li></ul></li><li><p>相机坐标</p><ul><li>根据透镜成像原理，将世界坐标在照相机内呈现，是一个三维坐标系</li><li><em>Oc-XcYcZc</em>：相机坐标系,光心为原点,单位m</li></ul></li><li><p>图像坐标</p><ul><li><p>将相机呈现的三维坐标投影到屏幕上，而建立的新坐标系，不含距离信息，是一个二维坐标系</p></li><li><p><em>o-xy</em> ：图像坐标系,原点为成像平面中点,单位mm一、相机<br>相机主要分为单目（Monocular）、双目(Stereo)、深度相机(RGB-D)三类。</p><p>单目相机：是三维空间的二维投影，可以用来估计相机运动和结构（场景的大小和远近）。<br>原理是近处的物体移动的快、远处的物体移动慢，相机运动可以形成视差。<br>优点：成本低；<br>缺点：尺度不确定性，无法估计物体的真实尺度。例如相机的运动和场景同时放大两倍，单目所看到的像是一样的。</p><p>双目相机：基线（两个相机间的距离）来估计每个像素的空间位置。基线越大，测量的物体越远。<br>优点：解决了尺度不确定性。<br>缺点：深度量程和精度受双目的基线和分辨率限制；视差的计算消耗计算资源。</p><p>深度相机：通过红外结构光或Time-of-Fligfeixianxingyouhuaht(ToF)原理，用物理方法测量物体的距离。<br>优点：相比双目节省计算量。<br>缺点：测量范围窄、噪声大、视野小、易受日光干扰、无法测量透射材料等</p></li></ul></li><li><p>像素坐标</p><ul><li>将投影的图像坐标离散抽样形成的做种图片，是一个二维的坐标系</li><li><em>uv</em> ：像素坐标系,原点为图像左上角,单位pixel</li></ul><p><img src="/images/slam-notes/27.png"></p></li></ul><h3 id="三、针孔相机模型"><a href="#三、针孔相机模型" class="headerlink" title="三、针孔相机模型"></a>三、针孔相机模型</h3><p><img src="/images/slam-notes/28.png"></p><p><strong>针孔相机模型的矩阵形式：</strong></p><p>中间的矩阵是相机的内参，记为K。</p><p><img src="/images/slam-notes/29.png"></p><p>除内参外，相机坐标系P与世界坐标系Pw还相差一个变换：</p><p><img src="/images/slam-notes/30.png"></p><p>这里 R, t 或 T 称为外参，是SLAM估计的目标。</p><h3 id="四、畸变"><a href="#四、畸变" class="headerlink" title="四、畸变"></a>四、畸变</h3><p>相机的前方通常会有一个透镜，会对成像产生影响，称为畸变。</p><p>由透镜形状引起的畸变称为径向畸变，包括桶形畸变和枕形畸变。桶形畸变是由于图像放大率随着与光轴之间的距离增加而减小；枕形畸变相反。</p><p><img src="/images/slam-notes/31.png"></p><p>径向畸变的程度会随着与中心距离的增加而增加，可以通过公式(5.11)进行矫正。 </p><p><img src="/images/slam-notes/32.png"></p><p>透镜在装机过程中不和成像平面严格平行会引入切向畸变。</p><p><img src="/images/slam-notes/33.png"></p><p>切向畸变通过公式(5.12)矫正。</p><p><img src="/images/slam-notes/34.png"></p><p>对于畸变的矫正在实际当中可灵活保留各项系数。通常在视觉SLAM中，考虑先对整张图片进行去畸变，得到去畸变后的图像，然后讨论图像中的点的位置。</p><h2 id="第六讲-非线性优化"><a href="#第六讲-非线性优化" class="headerlink" title="第六讲    非线性优化"></a>第六讲    <code>非线性优化</code></h2><p>待更新~</p>]]></content>
-      
-      
+<search>
+  <entry>
+    <title>几种常见的颜色空间</title>
+    <url>/2020/08/17/colorspace/</url>
+    <content><![CDATA[<h1 id="颜色空间"><a href="#颜色空间" class="headerlink" title="颜色空间"></a>颜色空间</h1><p><strong>在计算机视觉，尤其颜色识别相关的算法中，rgb,hsv,lab颜色空间混用更是常用的方法。</strong></p>
+<h2 id="RGB"><a href="#RGB" class="headerlink" title="RGB"></a>RGB</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>​    RGB颜色空间以R(Red:红)、G(Green:绿)、B(Blue:蓝)三种基本色为基础，进行不同程度的叠加，产生丰富而广泛的颜色，所以俗称三基色模式。在大自然中有无穷多种不同的颜色，而人眼只能分辨有限种不同的颜色，RGB模式可表示一千六百多万种不同的颜色，在人眼看来它非常接近大自然的颜色，故又称为自然色彩模式。红绿蓝代表可见光谱中的三种基本颜色或称为三原色，每一种颜色按其亮度的不同分为256个等级。当色光三原色重叠时，由于不同的混色比例能产生各种中间色，例如，三原色相加可产生白色。所以RGB模式是加色过程。屏幕显示的基础是RGB模式，彩色印刷品却无法用RGB模式来产生各种彩色，所以，<strong>RGB模式常用于视频、多媒体与网页设计</strong>。</p>
+<h3 id="空间模型"><a href="#空间模型" class="headerlink" title="空间模型"></a>空间模型</h3><p>​    对图像处理而言，RGB是最为重要和常见的颜色模型，它建立在笛卡尔坐标系中，以红、绿、蓝三种基本色为基础，<strong>进行不同程度的叠加</strong>，产生丰富而广泛的颜色，俗称三基色模式。如下图所示：</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9nc3MwLmJkc3RhdGljLmNvbS85NG8zZFNhZ194STRraEdrcG9XSzFIRjZoaHkvYmFpa2UvYzAlM0RiYWlrZTgwJTJDNSUyQzUlMkM4MCUyQzI2L3NpZ249MjdmYjUwZjlhYWVjMDhmYTMyMGQxYmY1Mzg4NzU2MDgvZTFmZTk5MjViYzMxNWM2MGU0NTA5ZmE5ODdiMWNiMTM0ODU0NzdhYi5qcGc?x-oss-process=image/format,png"></p>
+<h3 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h3><p>​    RGB模型的原理来自于颜色的三刺激理论，它基于以下假设:在眼睛的中央部位有3种类型的对色彩敏感的锥状细胞。其中一类对位于可见光谱中间位置的光波敏感，这种光波经人的视觉系统转换产生绿色感。而其他两种锥状细胞对位于可见光波的上、下端即较长和较短的波长的光波敏感，它们分别被识别为红色和蓝色。从生理学的角度来看，由于眼睛仅包含3种不同类型的锥状细胞，因而对任意3种颜色适当混合均可产生白光视觉，条件是这3中颜色中任意两种的组合都并不能产生第3种颜色，则这三种颜色就被称为三原色。</p>
+<h3 id="表达方式"><a href="#表达方式" class="headerlink" title="表达方式"></a>表达方式</h3><p>​     RGB空间是目前最常用的彩色信息表达方式，使用红、绿、蓝三原色的亮度来定量表示颜色，<strong>是以RGB三色光互相叠加来实现混色的方式</strong>。三种颜色所占比例不同，得到的颜色就不同。变换混合的比例，就会得到各种各样的混合效果。RGB颜色空间可以看作是三维直角坐标系中的一个单位正方体。任何一种颜色在RGB颜色空间中都可以用三维空间中的一个点来表示。在RGB颜色空间，任意色光F都可以用RGB三种颜色不同分量的相加混合而成：F=r[R]+g[G]+b[B]</p>
+<h4 id="色度学规则："><a href="#色度学规则：" class="headerlink" title="色度学规则："></a>色度学规则：</h4><p> 　(1)通过R,G,B这三种颜色能产生任何颜色，并且这三种颜色混合后产生的颜色是唯一的。<br> 　(2)如果两个颜色相等，这三个颜色分量再乘以或者除以相同的数，得到的颜色仍然相等。<br> 　(3)混合色的亮度等于每种颜色亮度的和。</p>
+<h3 id="优点与缺点"><a href="#优点与缺点" class="headerlink" title="优点与缺点"></a>优点与缺点</h3><p>​    优点： RGB颜色空间最大的优点就是直观，容易理解。</p>
+<p>​    缺点：<strong>R,G,B这3个分量是高度相关的</strong>，即如果一个颜色的某一个分量发生了一定程度的改变，那么这个颜色很可能要发生改变；人眼对于常见的红绿蓝三色的敏感程度是不一样的，因此RGB颜色空间的均匀性非常差，且两种颜色之间的知觉差异色差不能表示为该颜色空间中两点间的距离，但是利用线性或非线性变换，则可以从RGB颜色空间推导出其他的颜色特征空间。</p>
+<h2 id="HSV"><a href="#HSV" class="headerlink" title="HSV"></a>HSV</h2><h3 id="基本概念-1"><a href="#基本概念-1" class="headerlink" title="基本概念"></a>基本概念</h3><p>   HSV(Hue, Saturation, Value)是根据颜色的直观特性由A. R.  Smith在1978年创建的一种颜色空间, 也称六角锥体模型(Hexcone  Model)。这个模型中颜色的参数分别是：<strong>色调（H），饱和度（S），明度（V）</strong>。</p>
+<h3 id="空间模型-1"><a href="#空间模型-1" class="headerlink" title="空间模型"></a>空间模型</h3><h4 id="色调H："><a href="#色调H：" class="headerlink" title="色调H："></a>色调H：</h4><p>​    用角度度量，取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°，绿色为120°,蓝色为240°。它们的补色是：黄色为60°，青色为180°,品红为300°；</p>
+<h4 id="饱和度S："><a href="#饱和度S：" class="headerlink" title="饱和度S："></a>饱和度S：</h4><p>   饱和度S表示颜色接近光谱色的程度。一种颜色，可以看成是某种光谱色与白色混合的结果。其中光谱色所占的比例愈大，颜色接近光谱色的程度就愈高，颜色的饱和度也就愈高。饱和度高，颜色则深而艳。光谱色的白光成分为0，饱和度达到最高。通常取值范围为0%～100%，值越大，颜色越饱和。</p>
+<h4 id="明度V："><a href="#明度V：" class="headerlink" title="明度V："></a>明度V：</h4><p>明度表示颜色明亮的程度，对于光源色，明度值与发光体的光亮度有关；对于物体色，此值和物体的透射比或反射比有关。通常取值范围为0%（黑）到100%（白）。</p>
+<p><strong>RGB和CMY颜色模型都是面向硬件的，而HSV（Hue Saturation  Value）颜色模型是面向用户的。</strong>HSV模型的三维表示从RGB立方体演化而来。设想从RGB沿立方体对角线的白色顶点向黑色顶点观察，就可以看到立方体的六边形外形。六边形边界表示色彩，水平轴表示纯度，明度沿垂直轴测量。</p>
+<p> <img src="https://img-blog.csdnimg.cn/20181128220932509.png"> </p>
+<p> <img src="https://img-blog.csdnimg.cn/20181128220957174.png"></p>
+<h3 id="从RGB到HSV的转换"><a href="#从RGB到HSV的转换" class="headerlink" title="从RGB到HSV的转换"></a>从RGB到HSV的转换</h3><p>​    HSV 在数学上定义为在 RGB 空间中的颜色的 R, G 和 B 的坐标的变换。设 (r, g, b) 分别是一个颜色的红、绿和蓝坐标，它们的值是在 0 到 1 之间的实数。设 max 等价于 r, g 和 b 中的最大者，设 min 等于这些值中的最小者。要找到在 HSV 空间中的 (h, s, v) 值，这里的 h ∈ [0,  360）是角度的色相角，而 s, v ∈ [0,1] 是饱和度和亮度，计算公式为：</p>
+<p><img src="https://img-blog.csdnimg.cn/20181128221242343.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ppYW5nSHVpMTIxMQ==,size_16,color_FFFFFF,t_70"></p>
+<p><img src="https://img-blog.csdnimg.cn/20181128221304329.png"></p>
+<p><img src="https://img-blog.csdnimg.cn/2018112822132243.png"></p>
+<p>​    HSV对用户来说是一种直观的颜色模型。我们可以从一种纯色彩开始，即指定色彩角H，并让V=S=1，然后我们可以通过向其中加入黑色和白色来得到我们需要的颜色。<strong>增加黑色可以减小V而S不变，同样增加白色可以减小S而V不变。</strong>例如，要得到深蓝色，V=0.4 S=1 H=240度。要得到淡蓝色，V=1 S=0.4 H=240度。</p>
+<p>   一般说来，人眼最大能区分128种不同的色彩，130种色饱和度，23种明暗度。如果我们用16Bit表示HSV的话，可以用7位存放H，4位存放S，5位存放V，即745或者655就可以满足我们的需要了。</p>
+<p>​    由于HSV是一种比较直观的颜色模型，所以在许多图像编辑工具中应用比较广泛，如Photoshop（在Photoshop中叫HSB）等等，但这也决定了<strong>它不适合使用在光照模型中，许多光线混合运算、光强运算等都无法直接使用HSV来实现。</strong></p>
+<h2 id="LAB"><a href="#LAB" class="headerlink" title="LAB"></a>LAB</h2><h3 id="基本概念-2"><a href="#基本概念-2" class="headerlink" title="基本概念"></a>基本概念</h3><p>​     <a href="https://baike.baidu.com/item/Lab%E6%A8%A1%E5%BC%8F/7362402">Lab模式</a>是根据Commission International Eclairage（CIE）在1931年所制定的一种测定颜色的国际标准建立的。于1976年被改进，并且命名的一种色彩模式。Lab颜色模型弥补了<a href="https://baike.baidu.com/item/RGB/342517">RGB</a>和CMYK两种色彩模式的不足。它是一种<strong>设备无关的颜色模型</strong>，也是一种<strong>基于生理特征的颜色模型</strong>。 Lab颜色模型由三个要素组成，一个要素是亮度（L），a 和b是两个<a href="https://baike.baidu.com/item/%E9%A2%9C%E8%89%B2%E9%80%9A%E9%81%93/5706858">颜色通道</a>。a包括的颜色是从<a href="https://baike.baidu.com/item/%E6%B7%B1%E7%BB%BF%E8%89%B2/2192808">深绿色</a>（低亮度值）到灰色（中亮度值）再到亮粉红色（高亮度值）；b是从亮蓝色（低亮度值）到灰色（中亮度值）再到黄色（高亮度值）。因此，这种颜色混合后将产生具有明亮效果的色彩。</p>
+<h3 id="空间模型-2"><a href="#空间模型-2" class="headerlink" title="空间模型"></a>空间模型</h3><p>​    <a href="https://baike.baidu.com/item/Lab%E6%A8%A1%E5%BC%8F/7362402">Lab模式</a>既不依赖光线，也不依赖于颜料，它是CIE组织确定的一个理论上包括了人眼可以看见的所有色彩的色彩模式。Lab模式弥补了<a href="https://baike.baidu.com/item/RGB/342517">RGB</a>和CMYK两种色彩模式的不足。同RGB颜色空间相比，Lab是一种不常用的色彩空间。它是一种设备无关的颜色系统，也是一种基于生理特征的颜色系统。这也就意味着，<strong>它是用数字化的方法来描述人的视觉感应</strong>。Lab颜色空间中的L分量用于表示像素的亮度，取值范围是[0,100],表示从纯黑到纯白；a表示从红色到绿色的范围，取值范围是[127,-128]；b表示从黄色到蓝色的范围，取值范围是[127,-128]。下图所示为Lab颜色空间的图示：</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9nc3MzLmJkc3RhdGljLmNvbS8tUG8zZFNhZ194STRraEdrcG9XSzFIRjZoaHkvYmFpa2UvYzAlM0RiYWlrZTgwJTJDNSUyQzUlMkM4MCUyQzI2L3NpZ249ZTM1OWY1YTZhNDRiZDExMzEwYzBiZjYwM2JjNmNmNmEvMDIzYjViYjVjOWVhMTVjZTFkMWZmMWRjYmYwMDNhZjMzYjg3YjI3NS5qcGc?x-oss-process=image/format,png"></p>
+<h3 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h3><p>​     <strong>Lab颜色空间比计算机显示器甚至比人类视觉的色域都要大 **，表示为Lab的位图比RGB或CMYK位图获得同样的精度需要要求更多的像素数据。<a href="https://baike.baidu.com/item/Lab%E6%A8%A1%E5%BC%8F/7362402">Lab模式</a>所定义的色彩最多，且与光线及设备无关并且</strong>处理速度与<a href="https://baike.baidu.com/item/RGB%E6%A8%A1%E5%BC%8F/7362104">RGB模式</a>同样快**，比<a href="https://baike.baidu.com/item/CMYK%E6%A8%A1%E5%BC%8F/305545">CMYK模式</a>快很多。因此，可以放心大胆的在图象编辑中使用Lab模 式。而且，Lab模式在转换成CMYK模式时色彩没有丢失或被替换。因此，最佳避免色彩损失的方法是：应用Lab模式编辑图象，再转换为CMYK模式打印 输出。</p>
+<h2 id="CMYK"><a href="#CMYK" class="headerlink" title="CMYK"></a>CMYK</h2><h3 id="基本概念-3"><a href="#基本概念-3" class="headerlink" title="基本概念"></a>基本概念</h3><p>​    当阳光照射到一个物体上时，这个物体将吸收一部分光线，并将剩下的光线进行反射，反射的光线就是我们所看见的物体颜色。这是一种**减色<a href="https://baike.baidu.com/item/%E8%89%B2%E5%BD%A9%E6%A8%A1%E5%BC%8F/10209468">色彩模式</a>**，同时也是与<a href="https://baike.baidu.com/item/RGB%E6%A8%A1%E5%BC%8F">RGB模式</a>的根本不同之处。不但我们看物体的颜色时用到了这种减色模式，而且在纸上印刷时应用的也是这种减色模式。CMYK代表印刷上用的四种颜色，C代表青色（Cyan），M代表<a href="https://baike.baidu.com/item/%E6%B4%8B%E7%BA%A2%E8%89%B2/6833575">洋红色</a>（Magenta），Y代表黄色（Yellow），K代表黑色（Black）。因为在实际应用中，青色、洋红色和黄色很难叠加形成真正的黑色，最多不过是褐色而已。因此才引入了K——黑色。黑色的作用是强化暗调，加深暗部色彩。</p>
+<h3 id="打印模式"><a href="#打印模式" class="headerlink" title="打印模式"></a>打印模式</h3><p>​     <strong>CMYK模式俗称四色打印模式，是最佳的打印模式</strong>。但是在进行实际打印时，两种模式存在转换问题，具体原因如下：</p>
+<p>​     1. CMYK模式编辑虽然能够避免色彩的损失，但运算速度很慢。主要原因如下：</p>
+<p>​        1）、即使在CMYK模式下工作，<a href="https://baike.baidu.com/item/Photoshop/133866">Photoshop</a>也必须将CMYK模式转变为显示器所使用的RGB模式。</p>
+<p>​        2）、对于同样的图像，RGB模式只需要处理三个<a href="https://baike.baidu.com/item/%E9%80%9A%E9%81%93">通道</a>即可，而CMYK模式则需要处理四个。</p>
+<p>​     2.  用户所使用的扫描仪和显示器都是<a href="https://baike.baidu.com/item/RGB/342517">RGB</a>设备，所以无论什么时候使用CMYK模式工作都有把RGB模式转换为CMYK模式这样一个过程。因此，是否应用CMYK模式进行编辑都存在<a href="https://baike.baidu.com/item/RGB%E6%A8%A1%E5%BC%8F/7362104">RGB模式</a>和CMYK模式转换的问题。</p>
+<p>​    对于<a href="https://baike.baidu.com/item/RGB%E6%A8%A1%E5%BC%8F/7362104">RGB模式</a>和CMYK模式转换的问题，可以先用RGB模式进行编辑工作，再用CMYK模式进行打印工作，在打印前才进行转换，然后加入必要的<a href="https://baike.baidu.com/item/%E8%89%B2%E5%BD%A9%E6%A0%A1%E6%AD%A3/10786529">色彩校正</a>，<a href="https://baike.baidu.com/item/%E9%94%90%E5%8C%96/2189784">锐化</a>和修整。这样虽然使<a href="https://baike.baidu.com/item/Photoshop/133866">Photoshop</a>在CMYK模式下速度慢一些，但可节省大部分编辑时间。这种打印前的模式转换，并不是避免图像损失最佳的途径，最佳方法是将<a href="https://baike.baidu.com/item/Lab%E6%A8%A1%E5%BC%8F">Lab模式</a>和CMYK模式相结合使用，这样可以最大程度的减少图像失真。</p>
+<h3 id="优缺点-1"><a href="#优缺点-1" class="headerlink" title="优缺点"></a>优缺点</h3><p>   优点：可以满足打印的需求，解决RGB不能打印的问题</p>
+<p>   缺点：一定程度上存在色彩的缺失，运行速度慢</p>
+]]></content>
       <categories>
-          
-          <category> 视觉SLAM </category>
-          
+        <category>计算机视觉</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> slam </tag>
-            
-        </tags>
-      
-    </entry>
+      <tags>
+        <tag>OpenCV</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ROS中nodelet的使用</title>
+    <url>/2020/09/04/ros-zhong-nodelet-de-shi-yong/</url>
+    <content><![CDATA[<h1 id="ROS中nodelet的使用："><a href="#ROS中nodelet的使用：" class="headerlink" title="ROS中nodelet的使用："></a>ROS中nodelet的使用：</h1><h2 id="1-为什么使用nodelet？"><a href="#1-为什么使用nodelet？" class="headerlink" title="1. 为什么使用nodelet？"></a>1. 为什么使用nodelet？</h2><p>Nodelet提供了一种方法，可以在同一台计算机上，在同一个进程内，运行多个算法，且在进程内消息传递时不产生复制成本（zero  copy）。在一个node里面，roscpp利用指针传递可以实现在publish和subscribe调用时的零拷贝。为了实现相似的效果，多个nodelets允许将多个类动态加载到同一个node里，同时还提供独立的命名空间，从而使得这些nodelets尽管运行在同一个进程里，但却仍然像单独的node一样工作。也就实现了“在一个进程（node）里运行多个nodelet”的效果。</p>
+<p>因此，大通量数据流可能包含多个nodelet，此时若将他们加载到同一个进程里，就可以避免数据拷贝和网络传输。</p>
+<h2 id="2-在ROS工程中使用nodelet"><a href="#2-在ROS工程中使用nodelet" class="headerlink" title="2. 在ROS工程中使用nodelet"></a>2. 在ROS工程中使用nodelet</h2><h3 id="2-1-创建工作空间和程序包"><a href="#2-1-创建工作空间和程序包" class="headerlink" title="2.1 创建工作空间和程序包"></a>2.1 创建工作空间和程序包</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> -p ~/catkin_ar/src
+
+<span class="token builtin class-name">cd</span> catkin_ar/
+
+catkin_make
+
+<span class="token builtin class-name">source</span> devel/setup.sh
+
+<span class="token builtin class-name">cd</span> src
+
+catkin_create_pkg try_nodelet roscpp rospy nodelet std_msgs sensor_msgs cv_bridge image_transport ddynamic_reconfigure<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="2-2-创建并且编写cpp文件与hpp文件"><a href="#2-2-创建并且编写cpp文件与hpp文件" class="headerlink" title="2.2 创建并且编写cpp文件与hpp文件"></a>2.2 创建并且编写cpp文件与hpp文件</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">//try_use.hpp
+#pragma once
+#include &lt;nodelet/nodelet.h&gt;
+#include &lt;ros/ros.h&gt;
+
+namespace try_nodelet
+{
+    class try_use : public nodelet::Nodelet
+    {
+    public:
+        virtual void onInit();
+    };
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">//try_use.cpp
+#include &lt;pluginlib/class_list_macros.h&gt;
+#include &lt;../include/try_nodelet/try_use.hpp&gt;
+
+PLUGINLIB_EXPORT_CLASS(try_nodelet::try_use,nodelet::Nodelet)
+
+namespace try_nodelet
+{
+    void try_use::onInit()
+    {
+        NODELET_DEBUG("Initializing nodelet...");
+        ROS_INFO("Nodelet is Ok for test!!");
+    }
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="2-3-编写nodelet-plugins-xml"><a href="#2-3-编写nodelet-plugins-xml" class="headerlink" title="2.3 编写nodelet_plugins.xml"></a>2.3 编写nodelet_plugins.xml</h3><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>library</span> <span class="token attr-name">path</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>lib/libtry_nodelet<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
     
+<span class="token comment">&lt;!--上面这个try_nodelet是包的名字，下面的那个是命名空间的名字--&gt;</span>
     
-    
-    <entry>
-      <title>创建指定OpenCV版本的ROS工程</title>
-      <link href="2020/12/19/chuang-jian-zhi-ding-opencv-ban-ben-ros-gong-cheng/"/>
-      <url>2020/12/19/chuang-jian-zhi-ding-opencv-ban-ben-ros-gong-cheng/</url>
-      
-        <content type="html"><![CDATA[<h1 id="创建指定OpenCV版本的ROS工程"><a href="#创建指定OpenCV版本的ROS工程" class="headerlink" title="创建指定OpenCV版本的ROS工程"></a>创建指定OpenCV版本的ROS工程</h1><h3 id="一、创建工作空间和程序包"><a href="#一、创建工作空间和程序包" class="headerlink" title="一、创建工作空间和程序包"></a>一、创建工作空间和程序包</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> -p ~/catkin_cv/src<span class="token builtin class-name">cd</span> catkin_cv/catkin_make<span class="token builtin class-name">source</span> devel/setup.sh<span class="token builtin class-name">cd</span> srccatkin_create_pkg ballseeker roscpp rospy std_msgs sensor_msgs cv_bridge image_transport dynamic_reconfigure<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><h3 id="二、创建并且编写cpp文件与hpp文件"><a href="#二、创建并且编写cpp文件与hpp文件" class="headerlink" title="二、创建并且编写cpp文件与hpp文件"></a>二、创建并且编写cpp文件与hpp文件</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">gedit ballseeker/include/ballseeker/seek.hppgedit ballseeker/src/seek.cppgedit ballseeker/src/seekernode.cpp<span class="token comment">#代码见附录</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><h3 id="三、修改CMakeLists-txt"><a href="#三、修改CMakeLists-txt" class="headerlink" title="三、修改CMakeLists.txt"></a>三、修改CMakeLists.txt</h3><p>​        在CMakeLists最后加上：</p><pre class="line-numbers language-cmake" data-language="cmake"><code class="language-cmake"><span class="token comment"># catkin_add_nosetests(test)</span><span class="token keyword">set</span><span class="token punctuation">(</span>OpenCV_DIR   /usr/local/share/OpenCV4<span class="token punctuation">)</span><span class="token keyword">find_package</span><span class="token punctuation">(</span>OpenCV REQUIRED<span class="token punctuation">)</span><span class="token keyword">add_library</span><span class="token punctuation">(</span><span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span>  src/seek.cpp<span class="token punctuation">)</span><span class="token keyword">add_dependencies</span><span class="token punctuation">(</span>   <span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span>    <span class="token punctuation">${</span><span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span>_EXPORTED_TARGETS<span class="token punctuation">}</span>    <span class="token punctuation">${</span>catkin_EXPORTED_TARGETS<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token keyword">target_link_libraries</span><span class="token punctuation">(</span>   <span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span>   <span class="token punctuation">${</span>catkin_LIBRARIES<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token comment">#add the publisher example  </span><span class="token keyword">add_executable</span><span class="token punctuation">(</span>seekernode src/seek.cpp include/ballseeker/seek.hpp src/seekernode.cpp<span class="token punctuation">)</span>  <span class="token keyword">target_link_libraries</span><span class="token punctuation">(</span>seekernode <span class="token punctuation">${</span>catkin_LIBRARIES<span class="token punctuation">}</span> <span class="token punctuation">${</span>OpenCV_LIBRARIES<span class="token punctuation">}</span><span class="token punctuation">)</span>   <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><h3 id="四、编译与运行"><a href="#四、编译与运行" class="headerlink" title="四、编译与运行"></a>四、编译与运行</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> catkin_cv/<span class="token builtin class-name">source</span> ~/catkin_cv/devel/setup.shcatkin_make<span class="token comment">#新开一个终端运行：</span>roscore<span class="token comment">#再回之前的终端运行：</span>rosrun ballseeker seekernode<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><h3 id="五、编写launch文件快速启动"><a href="#五、编写launch文件快速启动" class="headerlink" title="五、编写launch文件快速启动"></a>五、编写launch文件快速启动</h3><p>​        在终端中运行：</p><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> ~/catkin_cv/src/ballseeker/launchgedit quickstart.launch<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><p>​        在quickstart.launch中写入：</p><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>launch</span><span class="token punctuation">&gt;</span></span>        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>node</span><span class="token attr-name">pkg</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span> <span class="token punctuation">"</span>ballseeker<span class="token punctuation">"</span></span><span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>quickseeknode<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>seekernode<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>launch</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>​        回到终端再运行：</p><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">source</span> ~/catkin_cv/devel/setup.shroslaunch ballseeker quickstart.launch<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><h3 id="六、dynamic-reconfigure"><a href="#六、dynamic-reconfigure" class="headerlink" title="六、dynamic_reconfigure"></a>六、dynamic_reconfigure</h3><p>​        略</p><h3 id="七、调整与保存参数"><a href="#七、调整与保存参数" class="headerlink" title="七、调整与保存参数"></a>七、调整与保存参数</h3><p>​        略</p><h3 id="八、附录（示例代码）"><a href="#八、附录（示例代码）" class="headerlink" title="八、附录（示例代码）"></a>八、附录（示例代码）</h3><blockquote><p>注意：这里的代码的作用是调用摄像头来检测它看到的网球</p></blockquote><p>​        在seek.hpp中写入：</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#pragma once#include "ros/ros.h"#include "opencv2/opencv.hpp"#include "vector"#include "sstream"const int red_ball = 0;const int yellow_ball = 1;const int blue_ball = 2;class seek{public:    seek(int service_id=0);    ~seek();    void getstart();        //从摄像头获取图片、双边滤波、转化hsv    void display();         //找球并展示中间效果和最终效果    void creatbar();        //创建滑动条调整参数private:    int bgr_min[3];    int bgr_max[3];    int hsv_min[3];    int hsv_max[3];    cv::Mat src;    cv::Mat bgr_dst;    cv::Mat hsv_dst;    cv::Mat see_red;    cv::Mat see_yellow;    cv::Mat see_blue;    cv::VideoCapture capture;    void updateparam(int type_of_ball);    void process(cv::Mat&amp; input,int type_of_ball);//阈值化、膨胀、找轮廓、找矩形并筛选、画圆    static void on_change(int, void*);};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>​        在seek.cpp中写入：</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include "../include/ballseeker/seek.hpp"seek::seek(int service_id){    //设置摄像机参数    capture.open(1);    capture.set(CV_CAP_PROP_FRAME_WIDTH,640);capture.set(CV_CAP_PROP_FRAME_HEIGHT,480);}seek::~seek(){}void seek::getstart(){    capture&gt;&gt;src;    cv::bilateralFilter(src,bgr_dst,20,1000,1000);    cv::cvtColor(bgr_dst,hsv_dst,CV_BGR2HSV);}void seek::display(){    process(see_red,red_ball);       //可能得会用bgr处理红球了，HSV下效果不太好    process(see_yellow,yellow_ball);    process(see_blue,blue_ball);    cv::imshow("SEE_RED_BALL",see_red);    cv::imshow("SEE_YELLOW_BALL",see_yellow);    cv::imshow("SEE_BLUE_BALL",see_blue);    cv::imshow("FINALLY",src);    cv::waitKey(30);}void seek::process(cv::Mat&amp; input, int type_of_ball){    updateparam(type_of_ball);    cv::inRange(hsv_dst,cv::Scalar(hsv_min[0],hsv_min[1],hsv_min[2]),        cv::Scalar(hsv_max[0],hsv_max[1],hsv_max[2]),input);    cv::Mat element =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15, 15));       cv::dilate(input, input, element);    std::vector&lt;std::vector&lt;cv::Point&gt; &gt; contours;    std::vector&lt;cv::Vec4i&gt; hierarchy;    std::vector&lt;cv::Rect&gt; rects;    cv::findContours(input, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);    for (int i = 0; i &lt; contours.size(); i++)    {        rects.push_back(cv::boundingRect(contours[i]));        if ((rects.back().height &lt; 100 || rects.back().width &lt; 100) ||            fabsf(rects.back().height - rects.back().width) &gt; 20)            rects.erase(rects.end() - 1);    }    for (int i = 0; i &lt; rects.size(); i++)    {        double R = (rects[i].height + rects[i].width) / 4;        double x = rects[i].x + R;        double y = rects[i].y + R;        cv::Point center(x, y);        cv::circle(src, center, R + 5, cv::Scalar(0, 0, 255), 5);    }}void seek::updateparam(int type_of_ball){    switch (type_of_ball)    {    case red_ball:        hsv_min[0]= 0 ;hsv_min[1]= 105 ;hsv_min[2]= 108 ;        hsv_max[0]= 11 ;hsv_max[1]= 255 ;hsv_max[1]= 255 ;        break;    case yellow_ball:        hsv_min[0]= 18 ;hsv_min[1]= 56 ;hsv_min[2]= 177 ;        hsv_max[0]= 71 ;hsv_max[1]= 187 ;hsv_max[1]= 255 ;        break;    case blue_ball:        hsv_min[0]= 85 ;hsv_min[1]= 129 ;hsv_min[2]= 128 ;        hsv_max[0]= 124 ;hsv_max[1]= 255 ;hsv_max[1]= 255 ;        break;    default:        break;    }}void seek::creatbar(){    cv::namedWindow("SetParam");cv::createTrackbar("minH", "SetParam", &amp;hsv_min[0], 180, on_change);cv::createTrackbar("minS", "SetParam", &amp;hsv_min[1], 255, on_change);cv::createTrackbar("minV", "SetParam", &amp;hsv_min[2], 255, on_change);cv::createTrackbar("maxH", "SetParam", &amp;hsv_max[0], 180, on_change);cv::createTrackbar("maxS", "SetParam", &amp;hsv_max[1], 255, on_change);cv::createTrackbar("maxV", "SetParam", &amp;hsv_max[2], 255, on_change);on_change(0, 0);}void seek::on_change(int, void*){}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>​        在seekernode.cpp中写入：</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include "../include/ballseeker/seek.hpp"int main(int argc,char** argv){    ros::init(argc,argv,"seekernode");    ros::NodeHandle n;    seek icu(1);    icu.creatbar();    while(ros::ok())    {        icu.getstart();        icu.display();        ros::spinOnce();    }    return 0;}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>]]></content>
-      
-      
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>class</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>try_nodelet/try_use<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>try_nodelet::try_use<span class="token punctuation">"</span></span> <span class="token attr-name">base_class_type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>nodelet::Nodelet<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>
+  Trying to use nodelet in ROS.
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>class</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>library</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="2-4-修改CMakeLists-txt与package-xml"><a href="#2-4-修改CMakeLists-txt与package-xml" class="headerlink" title="2.4 修改CMakeLists.txt与package.xml"></a>2.4 修改CMakeLists.txt与package.xml</h3><p>修改CMakeLists.txt</p>
+<pre class="line-numbers language-cmake" data-language="cmake"><code class="language-cmake"><span class="token keyword">cmake_minimum_required</span><span class="token punctuation">(</span><span class="token property">VERSION</span> <span class="token number">3.0.2</span><span class="token punctuation">)</span>
+<span class="token keyword">project</span><span class="token punctuation">(</span>try_nodelet<span class="token punctuation">)</span>
+
+<span class="token keyword">add_compile_options</span><span class="token punctuation">(</span>-std=c++<span class="token number">11</span><span class="token punctuation">)</span>
+<span class="token comment">#上面这个最好加上，否则可能会编译失败</span>
+
+<span class="token keyword">find_package</span><span class="token punctuation">(</span>catkin REQUIRED COMPONENTS
+  cv_bridge
+  ddynamic_reconfigure
+  image_transport
+  nodelet
+  roscpp
+  rospy
+  sensor_msgs
+  std_msgs
+<span class="token punctuation">)</span>
+
+<span class="token function">catkin_package</span><span class="token punctuation">(</span>
+  INCLUDE_DIRS include
+  LIBRARIES try_nodelet
+  CATKIN_DEPENDS cv_bridge ddynamic_reconfigure image_transport nodelet roscpp rospy sensor_msgs std_msgs
+<span class="token comment">#  DEPENDS system_lib</span>
+<span class="token punctuation">)</span>
+
+<span class="token keyword">include_directories</span><span class="token punctuation">(</span>
+   include
+  <span class="token punctuation">${</span>catkin_INCLUDE_DIRS<span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+
+<span class="token keyword">add_library</span><span class="token punctuation">(</span><span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span> 
+    src/try_use.cpp
+<span class="token punctuation">)</span>
+
+<span class="token keyword">add_dependencies</span><span class="token punctuation">(</span>
+    <span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span> 
+    <span class="token punctuation">${</span><span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span>_EXPORTED_TARGETS<span class="token punctuation">}</span> 
+    <span class="token punctuation">${</span>catkin_EXPORTED_TARGETS<span class="token punctuation">}</span>
+<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>修改package.xml</p>
+<pre class="line-numbers language-xml" data-language="xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>package</span> <span class="token attr-name">format</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>2<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>name</span><span class="token punctuation">&gt;</span></span>try_nodelet<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>name</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">&gt;</span></span>0.0.0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>The try_nodelet package<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span>
+
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>maintainer</span> <span class="token attr-name">email</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>npu-lqx@todo.todo<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>npu-lqx<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>maintainer</span><span class="token punctuation">&gt;</span></span>
+
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>license</span><span class="token punctuation">&gt;</span></span>TODO<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>license</span><span class="token punctuation">&gt;</span></span>
+
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>buildtool_depend</span><span class="token punctuation">&gt;</span></span>catkin<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>buildtool_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>cv_bridge<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>ddynamic_reconfigure<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>image_transport<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>nodelet<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>roscpp<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>rospy<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>sensor_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>std_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>cv_bridge<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>ddynamic_reconfigure<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>image_transport<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>nodelet<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>roscpp<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>rospy<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>sensor_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>std_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>cv_bridge<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>ddynamic_reconfigure<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>image_transport<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>nodelet<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>roscpp<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>rospy<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>sensor_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>std_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>
+
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>export</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nodelet</span> <span class="token attr-name">plugin</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>${prefix}/nodelet_plugins.xml<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>export</span><span class="token punctuation">&gt;</span></span>
+
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>package</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="3-启动ROS节点"><a href="#3-启动ROS节点" class="headerlink" title="3.启动ROS节点"></a>3.启动ROS节点</h2><h3 id="3-1-编写launch文件进行快速启动"><a href="#3-1-编写launch文件进行快速启动" class="headerlink" title="3.1 编写launch文件进行快速启动"></a>3.1 编写launch文件进行快速启动</h3><p>新建一个launch文件夹，并在文件夹中新建一个start.launch文件</p>
+<pre class="line-numbers language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>launch</span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>node</span> <span class="token attr-name">pkg</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>standalone_nodelet<span class="token punctuation">"</span></span>  <span class="token attr-name">args</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>manager<span class="token punctuation">"</span></span> <span class="token attr-name">output</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>screen<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>node</span> <span class="token attr-name">pkg</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>using_nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">args</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>load try_nodelet/try_use standalone_nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">output</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>screen<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>node</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>launch</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="3-2-通过命令行运行"><a href="#3-2-通过命令行运行" class="headerlink" title="3.2 通过命令行运行"></a>3.2 通过命令行运行</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#终端1</span>
+roscore
+<span class="token comment">#终端2</span>
+rosrun nodelet nodelet manager __name:<span class="token operator">=</span>nodelet_manager
+<span class="token comment">#终端3</span>
+rosrun nodelet nodelet load try_nodelet/try_use nodelet_manager __name:<span class="token operator">=</span>using_nodelet<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>注意，如果这里报错“According to the loaded plugin descriptions the class try_nodelet/try_use with base class type nodelet::Nodelet does not exist.”  一般是因为运行manager的窗口（终端2）没有source</p>
+<p>所以要么一开始就把source写进配置文件中，要么就每个相关的窗口都要source，这样能够避免很多问题，也方便自己找到程序的bug所在。</p>
+<h2 id="4-将已有的ROS工程改写为nodelet"><a href="#4-将已有的ROS工程改写为nodelet" class="headerlink" title="4.将已有的ROS工程改写为nodelet"></a>4.将已有的ROS工程改写为nodelet</h2><p>待补充~</p>
+]]></content>
       <categories>
-          
-          <category> 计算机视觉 </category>
-          
+        <category>ROS基础操作</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> OpenCV </tag>
-            
-            <tag> ROS </tag>
-            
-        </tags>
-      
-    </entry>
+      <tags>
+        <tag>ROS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ROS中使用ddynamicReconfigure</title>
+    <url>/2020/09/05/ros-zhong-shi-yong-ddynamicreconfigure/</url>
+    <content><![CDATA[<h1 id="ROS中使用ddynamicReconfigure"><a href="#ROS中使用ddynamicReconfigure" class="headerlink" title="ROS中使用ddynamicReconfigure"></a>ROS中使用ddynamicReconfigure</h1><h2 id="关于ddynamicReconfigure类"><a href="#关于ddynamicReconfigure类" class="headerlink" title="关于ddynamicReconfigure类"></a>关于ddynamicReconfigure类</h2><p>The DDynamicReconfigure class allows to use ROS dynamic reconfigure without the need to write a custom cpf file, <strong>variables are registered and exposed at run time</strong>.  Modification of the variables is done through a variable pointer or through a callback function.</p>
+<p>The <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> class is the main class responsible for keeping track of parameters basic properties, values, descriptions, etc. </p>
+<p>It is also responsible of handling callbacks, config change requests, description setup and config setup, and the ROS publishers and  services.</p>
+<p>To operate a DDynamic instance, you must go through the following procedure:</p>
+<ol>
+<li>Construct a <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> instance with proper handling.</li>
+<li>Add parameters to the instance as needed with any of the “add” methods.</li>
+<li>Start the ROS services with any of the “start” methods.</li>
+<li>If you need to change the callback after startup you may do so using “setCallback”.</li>
+<li>When you need to get any of the stored parameters, call either “get” or “at” on this instance, rather than through the callback. </li>
+</ol>
+<h2 id="常用函数原型-amp-解析"><a href="#常用函数原型-amp-解析" class="headerlink" title="常用函数原型&amp;解析"></a>常用函数原型&amp;解析</h2><p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p>
+<p>When a change is made, <strong>it will be reflected in the variable directly.</strong></p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;
+  void registerVariable(
+  const std::string &amp;name, 
+  T *variable,
+  const std::string &amp;description = "", 
+  T min = getMin&lt;T&gt;(), 
+  T max = getMax&lt;T&gt;()
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;
+  void registerEnumVariable(
+  const std::string &amp;name, 
+  T *variable,
+  const std::string &amp;description = "",
+  std::map&lt;std::string, T&gt; enum_dict = {},
+  const std::string &amp;enum_description = ""
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<hr>
+<p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p>
+<p>When a change is made, <strong>the callback will be called with the new value.</strong></p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
+  void registerVariable(
+  const std::string &amp;name, 
+  T current_value,
+  const boost::function&lt;void(T value)&gt; &amp;callback,
+  const std::string &amp;description = "", 
+  T min = getMin&lt;T&gt;(), 
+  T max = getMax&lt;T&gt;()
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
+  void registerEnumVariable(
+  const std::string &amp;name, 
+  T current_value,
+  const boost::function&lt;void(T)&gt; &amp;callback,
+  const std::string &amp;description,
+  std::map&lt;std::string, T&gt; enum_dict = {},
+  const std::string &amp;enum_description = ""
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<hr>
+<p>publishServicesTopics <strong>starts the server</strong> once all the needed variables are registered.</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">void publishServicesTopics();<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>关于getMin()与getMax()</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
+inline T getMin()
+{
+  return std::numeric_limits&lt;T&gt;::min();
+}
+
+template &lt;&gt;
+inline bool getMin()
+{
+  return false;
+}
+
+template &lt;&gt;
+inline std::string getMin&lt;std::string&gt;()
+{
+  return "";
+}
+
+template &lt;typename T&gt;
+inline T getMax()
+{
+  return std::numeric_limits&lt;T&gt;::min();
+}
+
+template &lt;&gt;
+inline bool getMax()
+{
+  return true;
+}
+
+template &lt;&gt;
+inline std::string getMax()
+{
+  return "";
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="简单示例"><a href="#简单示例" class="headerlink" title="简单示例"></a>简单示例</h2><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;ros/ros.h&gt;
+#include &lt;ddynamic_reconfigure/ddynamic_reconfigure.h&gt;
+
+int global_int;
+
+void paramCb(int new_value)
+{
+   global_int = new_value;
+   ROS_INFO("Param modified: %d", global_int);
+}
+
+int main(int argc, char **argv) {
+    // ROS init stage
+    ros::init(argc, argv, "ddynamic_tutorials");
+    ros::NodeHandle nh;
+    ddynamic_reconfigure::DDynamicReconfigure ddr;
     
-    
-    
-    <entry>
-      <title>ROS中使用ddynamicReconfigure</title>
-      <link href="2020/09/05/ros-zhong-shi-yong-ddynamicreconfigure/"/>
-      <url>2020/09/05/ros-zhong-shi-yong-ddynamicreconfigure/</url>
-      
-        <content type="html"><![CDATA[<h1 id="ROS中使用ddynamicReconfigure"><a href="#ROS中使用ddynamicReconfigure" class="headerlink" title="ROS中使用ddynamicReconfigure"></a>ROS中使用ddynamicReconfigure</h1><h2 id="关于ddynamicReconfigure类"><a href="#关于ddynamicReconfigure类" class="headerlink" title="关于ddynamicReconfigure类"></a>关于ddynamicReconfigure类</h2><p>The DDynamicReconfigure class allows to use ROS dynamic reconfigure without the need to write a custom cpf file, <strong>variables are registered and exposed at run time</strong>.  Modification of the variables is done through a variable pointer or through a callback function.</p><p>The <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> class is the main class responsible for keeping track of parameters basic properties, values, descriptions, etc. </p><p>It is also responsible of handling callbacks, config change requests, description setup and config setup, and the ROS publishers and  services.</p><p>To operate a DDynamic instance, you must go through the following procedure:</p><ol><li>Construct a <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> instance with proper handling.</li><li>Add parameters to the instance as needed with any of the “add” methods.</li><li>Start the ROS services with any of the “start” methods.</li><li>If you need to change the callback after startup you may do so using “setCallback”.</li><li>When you need to get any of the stored parameters, call either “get” or “at” on this instance, rather than through the callback. </li></ol><h2 id="常用函数原型-amp-解析"><a href="#常用函数原型-amp-解析" class="headerlink" title="常用函数原型&amp;解析"></a>常用函数原型&amp;解析</h2><p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p><p>When a change is made, <strong>it will be reflected in the variable directly.</strong></p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;  void registerVariable(  const std::string &amp;name,   T *variable,  const std::string &amp;description = "",   T min = getMin&lt;T&gt;(),   T max = getMax&lt;T&gt;()  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;  void registerEnumVariable(  const std::string &amp;name,   T *variable,  const std::string &amp;description = "",  std::map&lt;std::string, T&gt; enum_dict = {},  const std::string &amp;enum_description = ""  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><hr><p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p><p>When a change is made, <strong>the callback will be called with the new value.</strong></p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;  void registerVariable(  const std::string &amp;name,   T current_value,  const boost::function&lt;void(T value)&gt; &amp;callback,  const std::string &amp;description = "",   T min = getMin&lt;T&gt;(),   T max = getMax&lt;T&gt;()  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;  void registerEnumVariable(  const std::string &amp;name,   T current_value,  const boost::function&lt;void(T)&gt; &amp;callback,  const std::string &amp;description,  std::map&lt;std::string, T&gt; enum_dict = {},  const std::string &amp;enum_description = ""  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><hr><p>publishServicesTopics <strong>starts the server</strong> once all the needed variables are registered.</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">void publishServicesTopics();<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre><p>关于getMin()与getMax()</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;inline T getMin(){  return std::numeric_limits&lt;T&gt;::min();}template &lt;&gt;inline bool getMin(){  return false;}template &lt;&gt;inline std::string getMin&lt;std::string&gt;(){  return "";}template &lt;typename T&gt;inline T getMax(){  return std::numeric_limits&lt;T&gt;::min();}template &lt;&gt;inline bool getMax(){  return true;}template &lt;&gt;inline std::string getMax(){  return "";}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><h2 id="简单示例"><a href="#简单示例" class="headerlink" title="简单示例"></a>简单示例</h2><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;ros/ros.h&gt;#include &lt;ddynamic_reconfigure/ddynamic_reconfigure.h&gt;int global_int;void paramCb(int new_value){   global_int = new_value;   ROS_INFO("Param modified: %d", global_int);}int main(int argc, char **argv) {    // ROS init stage    ros::init(argc, argv, "ddynamic_tutorials");    ros::NodeHandle nh;    ddynamic_reconfigure::DDynamicReconfigure ddr;        ddr.registerVariable&lt;int&gt;("int_param",124, boost::bind(paramCb, _1), "param description",-1000,2357);    ddr.publishServicesTopics();    // Now parameter can be modified from the dynamic_reconfigure GUI or other tools and the callback is called on each update    ros::spin();    return 0; }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>]]></content>
-      
-      
+    ddr.registerVariable&lt;int&gt;("int_param",124, boost::bind(paramCb, _1), "param description",-1000,2357);
+    ddr.publishServicesTopics();
+    // Now parameter can be modified from the dynamic_reconfigure GUI or other tools and the callback is called on each update
+    ros::spin();
+    return 0;
+ }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+]]></content>
       <categories>
-          
-          <category> ROS基础操作 </category>
-          
+        <category>ROS基础操作</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> ROS </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>ROS中nodelet的使用</title>
-      <link href="2020/09/04/ros-zhong-nodelet-de-shi-yong/"/>
-      <url>2020/09/04/ros-zhong-nodelet-de-shi-yong/</url>
-      
-        <content type="html"><![CDATA[<h1 id="ROS中nodelet的使用："><a href="#ROS中nodelet的使用：" class="headerlink" title="ROS中nodelet的使用："></a>ROS中nodelet的使用：</h1><h2 id="1-为什么使用nodelet？"><a href="#1-为什么使用nodelet？" class="headerlink" title="1. 为什么使用nodelet？"></a>1. 为什么使用nodelet？</h2><p>Nodelet提供了一种方法，可以在同一台计算机上，在同一个进程内，运行多个算法，且在进程内消息传递时不产生复制成本（zero  copy）。在一个node里面，roscpp利用指针传递可以实现在publish和subscribe调用时的零拷贝。为了实现相似的效果，多个nodelets允许将多个类动态加载到同一个node里，同时还提供独立的命名空间，从而使得这些nodelets尽管运行在同一个进程里，但却仍然像单独的node一样工作。也就实现了“在一个进程（node）里运行多个nodelet”的效果。</p><p>因此，大通量数据流可能包含多个nodelet，此时若将他们加载到同一个进程里，就可以避免数据拷贝和网络传输。</p><h2 id="2-在ROS工程中使用nodelet"><a href="#2-在ROS工程中使用nodelet" class="headerlink" title="2. 在ROS工程中使用nodelet"></a>2. 在ROS工程中使用nodelet</h2><h3 id="2-1-创建工作空间和程序包"><a href="#2-1-创建工作空间和程序包" class="headerlink" title="2.1 创建工作空间和程序包"></a>2.1 创建工作空间和程序包</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> -p ~/catkin_ar/src<span class="token builtin class-name">cd</span> catkin_ar/catkin_make<span class="token builtin class-name">source</span> devel/setup.sh<span class="token builtin class-name">cd</span> srccatkin_create_pkg try_nodelet roscpp rospy nodelet std_msgs sensor_msgs cv_bridge image_transport ddynamic_reconfigure<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><h3 id="2-2-创建并且编写cpp文件与hpp文件"><a href="#2-2-创建并且编写cpp文件与hpp文件" class="headerlink" title="2.2 创建并且编写cpp文件与hpp文件"></a>2.2 创建并且编写cpp文件与hpp文件</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">//try_use.hpp#pragma once#include &lt;nodelet/nodelet.h&gt;#include &lt;ros/ros.h&gt;namespace try_nodelet{    class try_use : public nodelet::Nodelet    {    public:        virtual void onInit();    };}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">//try_use.cpp#include &lt;pluginlib/class_list_macros.h&gt;#include &lt;../include/try_nodelet/try_use.hpp&gt;PLUGINLIB_EXPORT_CLASS(try_nodelet::try_use,nodelet::Nodelet)namespace try_nodelet{    void try_use::onInit()    {        NODELET_DEBUG("Initializing nodelet...");        ROS_INFO("Nodelet is Ok for test!!");    }}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><h3 id="2-3-编写nodelet-plugins-xml"><a href="#2-3-编写nodelet-plugins-xml" class="headerlink" title="2.3 编写nodelet_plugins.xml"></a>2.3 编写nodelet_plugins.xml</h3><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>library</span> <span class="token attr-name">path</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>lib/libtry_nodelet<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>    <span class="token comment">&lt;!--上面这个try_nodelet是包的名字，下面的那个是命名空间的名字--&gt;</span>      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>class</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>try_nodelet/try_use<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>try_nodelet::try_use<span class="token punctuation">"</span></span> <span class="token attr-name">base_class_type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>nodelet::Nodelet<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>  Trying to use nodelet in ROS.  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>class</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>library</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><h3 id="2-4-修改CMakeLists-txt与package-xml"><a href="#2-4-修改CMakeLists-txt与package-xml" class="headerlink" title="2.4 修改CMakeLists.txt与package.xml"></a>2.4 修改CMakeLists.txt与package.xml</h3><p>修改CMakeLists.txt</p><pre class="line-numbers language-cmake" data-language="cmake"><code class="language-cmake"><span class="token keyword">cmake_minimum_required</span><span class="token punctuation">(</span><span class="token property">VERSION</span> <span class="token number">3.0.2</span><span class="token punctuation">)</span><span class="token keyword">project</span><span class="token punctuation">(</span>try_nodelet<span class="token punctuation">)</span><span class="token keyword">add_compile_options</span><span class="token punctuation">(</span>-std=c++<span class="token number">11</span><span class="token punctuation">)</span><span class="token comment">#上面这个最好加上，否则可能会编译失败</span><span class="token keyword">find_package</span><span class="token punctuation">(</span>catkin REQUIRED COMPONENTS  cv_bridge  ddynamic_reconfigure  image_transport  nodelet  roscpp  rospy  sensor_msgs  std_msgs<span class="token punctuation">)</span><span class="token function">catkin_package</span><span class="token punctuation">(</span>  INCLUDE_DIRS include  LIBRARIES try_nodelet  CATKIN_DEPENDS cv_bridge ddynamic_reconfigure image_transport nodelet roscpp rospy sensor_msgs std_msgs<span class="token comment">#  DEPENDS system_lib</span><span class="token punctuation">)</span><span class="token keyword">include_directories</span><span class="token punctuation">(</span>   include  <span class="token punctuation">${</span>catkin_INCLUDE_DIRS<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token keyword">add_library</span><span class="token punctuation">(</span><span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span>     src/try_use.cpp<span class="token punctuation">)</span><span class="token keyword">add_dependencies</span><span class="token punctuation">(</span>    <span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span>     <span class="token punctuation">${</span><span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span>_EXPORTED_TARGETS<span class="token punctuation">}</span>     <span class="token punctuation">${</span>catkin_EXPORTED_TARGETS<span class="token punctuation">}</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>修改package.xml</p><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml"><span class="token prolog">&lt;?xml version="1.0"?&gt;</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>package</span> <span class="token attr-name">format</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>2<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>name</span><span class="token punctuation">&gt;</span></span>try_nodelet<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>name</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">&gt;</span></span>0.0.0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>The try_nodelet package<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>maintainer</span> <span class="token attr-name">email</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>npu-lqx@todo.todo<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>npu-lqx<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>maintainer</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>license</span><span class="token punctuation">&gt;</span></span>TODO<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>license</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>buildtool_depend</span><span class="token punctuation">&gt;</span></span>catkin<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>buildtool_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>cv_bridge<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>ddynamic_reconfigure<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>image_transport<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>nodelet<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>roscpp<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>rospy<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>sensor_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_depend</span><span class="token punctuation">&gt;</span></span>std_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>cv_bridge<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>ddynamic_reconfigure<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>image_transport<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>nodelet<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>roscpp<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>rospy<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>sensor_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>std_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>build_export_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>cv_bridge<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>ddynamic_reconfigure<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>image_transport<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>nodelet<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>roscpp<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>rospy<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>sensor_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>exec_depend</span><span class="token punctuation">&gt;</span></span>std_msgs<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>exec_depend</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>export</span><span class="token punctuation">&gt;</span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nodelet</span> <span class="token attr-name">plugin</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>${prefix}/nodelet_plugins.xml<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>export</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>package</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><h2 id="3-启动ROS节点"><a href="#3-启动ROS节点" class="headerlink" title="3.启动ROS节点"></a>3.启动ROS节点</h2><h3 id="3-1-编写launch文件进行快速启动"><a href="#3-1-编写launch文件进行快速启动" class="headerlink" title="3.1 编写launch文件进行快速启动"></a>3.1 编写launch文件进行快速启动</h3><p>新建一个launch文件夹，并在文件夹中新建一个start.launch文件</p><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>launch</span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>node</span> <span class="token attr-name">pkg</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>standalone_nodelet<span class="token punctuation">"</span></span>  <span class="token attr-name">args</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>manager<span class="token punctuation">"</span></span> <span class="token attr-name">output</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>screen<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>node</span> <span class="token attr-name">pkg</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>using_nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">args</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>load try_nodelet/try_use standalone_nodelet<span class="token punctuation">"</span></span> <span class="token attr-name">output</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>screen<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>node</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>launch</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre><h3 id="3-2-通过命令行运行"><a href="#3-2-通过命令行运行" class="headerlink" title="3.2 通过命令行运行"></a>3.2 通过命令行运行</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#终端1</span>roscore<span class="token comment">#终端2</span>rosrun nodelet nodelet manager __name:<span class="token operator">=</span>nodelet_manager<span class="token comment">#终端3</span>rosrun nodelet nodelet load try_nodelet/try_use nodelet_manager __name:<span class="token operator">=</span>using_nodelet<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>注意，如果这里报错“According to the loaded plugin descriptions the class try_nodelet/try_use with base class type nodelet::Nodelet does not exist.”  一般是因为运行manager的窗口（终端2）没有source</p><p>所以要么一开始就把source写进配置文件中，要么就每个相关的窗口都要source，这样能够避免很多问题，也方便自己找到程序的bug所在。</p><h2 id="4-将已有的ROS工程改写为nodelet"><a href="#4-将已有的ROS工程改写为nodelet" class="headerlink" title="4.将已有的ROS工程改写为nodelet"></a>4.将已有的ROS工程改写为nodelet</h2><p>待补充~</p>]]></content>
-      
-      
+      <tags>
+        <tag>ROS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++描述符delete与override</title>
+    <url>/2020/08/21/delete-yu-override/</url>
+    <content><![CDATA[<h1 id="delete与override"><a href="#delete与override" class="headerlink" title="delete与override"></a>delete与override</h1><h2 id="优先使用delete关键字删除函数而非private却又不实现的函数"><a href="#优先使用delete关键字删除函数而非private却又不实现的函数" class="headerlink" title="优先使用delete关键字删除函数而非private却又不实现的函数"></a>优先使用delete关键字删除函数而非private却又不实现的函数</h2><h3 id="为什么使用delete？"><a href="#为什么使用delete？" class="headerlink" title="为什么使用delete？"></a>为什么使用delete？</h3><p>​    不想让别的开发者调用特定的函数,你只需要不声明这个函数就可以了。但有时候 C++为你声明了一些函数,如果你想阻止客户调用这些函数,就不是那么容易的事了。</p>
+<p>​    这种情况只有对“特殊的成员函数”才会出现,即这个成员函数是需要的时候C++自动生成的。    </p>
+<p>在C++98中阻止这类函数被使用的方法是将这些函数声明为private,并且不定义它们。</p>
+<p>​    将这些函数声明为私有来阻止客户调用他们。故意不定义它们是因为,如果有函数访问这些<br>函数(通过成员函数或者友好类)在链接的时候会导致没有定义而触发的错误。</p>
+<p>​    在C++11中,有一个更好的方法可以基本上实现同样的功能:用 =delete标识拷贝复制函数<br>和拷贝赋值函数为删除的函数deleted functions 。</p>
+<h3 id="delete的优点"><a href="#delete的优点" class="headerlink" title="delete的优点"></a>delete的优点</h3><p>​    删除函数一个重要的优势是任何函数都可以是删除的,然而仅有成员函数才可以是私有的。</p>
+<h4 id="防止普通非成员函数中的隐式转化"><a href="#防止普通非成员函数中的隐式转化" class="headerlink" title="防止普通非成员函数中的隐式转化"></a>防止普通非成员函数中的隐式转化</h4><p>​    C++继承于C意味着,很多其他类型被隐式的转换为in 类型,但是有些调用可以编译但是没有任何意义.</p>
+<p>​    举个例子,加入我们有个非成员函数,以一个整数位参数,然后返回这个参数是不是幸运数字:</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">bool isLucky(int number);
+
+isLucky('a');
+isLucky(true);
+isLucky(3.5);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​    如果幸运数字一定要是一个整数,我们希望能到阻止上面那种形式的调用。</p>
+<p>​    完成这个任务的一个方法是为想被排除出去的类型的重载函数声明为删除的:</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">bool isLucky(int number);
+
+bool isLucky(char)=delete;
+bool isLucky(bool)=delete;
+bool isLucky(double)=delete;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​    如果给float一个转换为int或者double的可能性, C++总是倾向于转化为double的。以float类型调用isLucky总是调用对应的double重载,而不是int类型的那个重载。结果就是将double类型的重载删除将会阻止float类型的调用编译。</p>
+<h4 id="阻止应该被禁用的模板实现"><a href="#阻止应该被禁用的模板实现" class="headerlink" title="阻止应该被禁用的模板实现"></a>阻止应该被禁用的模板实现</h4><p>​    假设你需要使用一个内嵌指针的模板：</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;
+void processPointer(T* ptr);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>​    但是在指针家族中，有两个特殊的指针。</p>
+<p>一个是 void* 指针，因为没有办法对它们解析引用，递增或者递减。</p>
+<p>另一个是 char* 指针，因为它们往往表示指向C类型的字符串，而不是指向独立字符的指针。</p>
+<p>​    这些特殊情况经常需要特殊处理。如果希望不能以 void* 或者 char* 为参数调用该函数，只需要删除这些实现：</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;&gt;
+void processPointer&lt;void*&gt;(void*)=delete;
+
+template&lt;&gt;
+void processPointer&lt;void*&gt;(void*)=delete;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>现在，使用 void* 或者 char* 调用该函数都是无效的，但使用 const void* 或者 const char* 调用也需要是无效的， 所以这些实现也需要被删除。（略）</p>
+<p>如果类内部有一个函数模板，想通过声明它们为私有来禁止某些实现，是做不到的，因为赋予一个成员函数模板的某种特殊情况下的拥有不同于模板主体的访问权限是不可能的。</p>
+<p>（可以声明 void* 和 char* 的版本却不实现它们 ）</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class MyClass
+{
+public:
+	template&lt;typename T&gt;
+	void function(T t);
+private:
+	template&lt;&gt;				//错误！！！
+	void function(char);	
+};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>并且模板的特殊情况必须要写在命名空间的作用域内，而不是类的作用域内。</p>
+<p>不过，这个问题对于删除函数是不存在的，它们也可以在类外被声明为是被删除的（也就是在命名空间的作用域内）</p>
+<h3 id="delete的注意事项"><a href="#delete的注意事项" class="headerlink" title="delete的注意事项"></a>delete的注意事项</h3><p>​    删除的函数不能通过任何方式被使用</p>
+<p>​    方便起见,删除函数被声明为公有的,而不是私有的。这样设计的原因是,当客户端程序尝试使用一个成员函数的时候, C++会在检查删除状态之前检查可访问权限。当客户端代码尝试访问一个删除的私有函数时,一些编译器仅仅会警报该函数为私有,尽管这里函数的可访问性并不本质上影响它是否可以被使用。当把私有未定义的函数改为对应的删除函数时,牢记这一点是很有意义的,因为使这个函数为公有的可以产生更易读的错误信息。</p>
+<h3 id="小结："><a href="#小结：" class="headerlink" title="小结："></a>小结：</h3><ol>
+<li>优先使用删除函数而不是私有而不定义的函数</li>
+<li>任何函数都可以被声明为删除，包括非成员函数和模板实现</li>
+</ol>
+<h3 id="扩展："><a href="#扩展：" class="headerlink" title="扩展："></a>扩展：</h3><h4 id="对于成员函数："><a href="#对于成员函数：" class="headerlink" title="对于成员函数："></a>对于成员函数：</h4><ol>
+<li>被delete了还是可以重载的</li>
+<li>被delete了，里面写个默认参数没问题</li>
+<li>delete函数可以被继承的！！！（看IDE的报错）(但不能用)</li>
+<li>私有的delete函数被类用户使用了会以“使用私有成员函数”的名义报错</li>
+<li>delete函数不能够被定义，只能够被声明</li>
+</ol>
+<h4 id="对于普通函数："><a href="#对于普通函数：" class="headerlink" title="对于普通函数："></a>对于普通函数：</h4><ol>
+<li>可以防止不想要的隐式转化</li>
+<li>但删除一种类型的，可能会影响不止一种类型的隐式转化（会导致其他类型的不明确，ambiguous）</li>
+<li>模板类的删除方式有两种，一种使用template，一种直接写出（暂时没发现会出啥问题）</li>
+</ol>
+<h2 id="使用override关键字声明覆盖的函数"><a href="#使用override关键字声明覆盖的函数" class="headerlink" title="使用override关键字声明覆盖的函数"></a>使用override关键字声明覆盖的函数</h2><p>在C++98中，如果要发生函数的覆盖，必须满足以下几个条件：</p>
+<ul>
+<li>基类中的函数必须是虚函数</li>
+<li>基类和派生类中函数的名字必须完全相同（析构函数除外）</li>
+<li>基类和派生类中的函数形参类型必须完全一样</li>
+<li>基类和派生类中的函数的常量特性必须完全一样</li>
+<li>基类和派生类中的函数返回值和异常声明必须是兼容的</li>
+</ul>
+<p>在C++11中，还有一条：</p>
+<ul>
+<li><p>基类和派生类的引用修饰符必须完全一样</p>
+<p>（引用修饰符是为了实现限制成员函数仅用于左值或者右值）</p>
+</li>
+</ul>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class Widget
+{
+public:
+    void doWork() &amp;;	//只有*this为左值时，这个版本才会被调用
+    void doWork() &amp;&amp;;	//只有*this为右值时，这个函数才会被调用
+};
+
+Widget makeWidget();	//工厂函数，返回右值
+Widget w;				//正常对象（左值）
+
+w.doWork();				//调用了Widget::doWork &amp;
+makeWidget().doWork();	//调用了Widget::doWork &amp;&amp;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>正是因为覆盖有这么多的要求，所以一个很小的错误都可以造成很大的偏差。并且覆盖函数中出现的错误通常还是合法的，，但它导致的结果并不是你想要的。所以当你犯了某些错误的时候，你并不能依赖于编译器对你的通知。</p>
+<p>例如下面这个例子，这些代码是完全合法的，但它一个虚函数都没有被覆盖——没有任何一个派生类的函数是和基类的对应函数绑定的。</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class	Base{
+public:
+    virtual	void	mf1()	const;
+    virtual	void	mf2(int	x);
+    virtual	void	mf3()	&amp;;
+    void	mf4()	const;
+};
+
+class	Derived:	public	Base	{
+public:
+    virtual	void	mf1();
+    virtual	void	mf2(unsigned	int	x);
+    virtual	void	mf3()	&amp;&amp;;
+    void	mf4()	const;
+};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>提示：</p>
+<ul>
+<li>mf1在Base中声明常成员函数,但是在Derived中没有</li>
+<li>mf2在Base中以int为参数,但是在Derived中以unsigned int为参数</li>
+<li>mf3在Base中有左值修饰符,但是在Derived中是右值修饰符</li>
+<li>mf4没有继承Base中的虚函数</li>
+</ul>
+<p>因为声明派生类的覆盖函数很重要，又如此容易出错，所以C++11提供了一种方法来显示的标明派生类中的函数是为了改写基类的版本，为其加上override声明即可。</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class	Derived:	public	Base {
+public:
+    virtual void mf1() override;
+
+    virtual void mf2(unsigned int x) override;
+
+    virtual void mf3() &amp;&amp; override;
+
+    virtual void mf4() const override;
+};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这样，上面这些代码就无法通过编译了，并且编译器会把覆盖函数所有的问题揭露出来。</p>
+<h3 id="扩展：-1"><a href="#扩展：-1" class="headerlink" title="扩展："></a>扩展：</h3><h4 id="与成员函数有关的几个描述符："><a href="#与成员函数有关的几个描述符：" class="headerlink" title="与成员函数有关的几个描述符："></a>与成员函数有关的几个描述符：</h4><ol>
+<li>成员函数前面使用const 表示返回值为const</li>
+<li>成员函数后面加 const表示函数不可以修改class的成员</li>
+<li>如果<strong>派生类</strong>在虚函数声明时使用了override描述符，那么该函数必须重载其基类中的同名函数，否则代码将无法通过编译。</li>
+<li>当不希望某个类被继承，或不希望某个虚函数被重写，可以在类名和虚函数后添加final关键字，添加final关键字后被继承或重写，编译器会报错</li>
+</ol>
+<h4 id="重载与覆盖"><a href="#重载与覆盖" class="headerlink" title="重载与覆盖"></a>重载与覆盖</h4><p>​    覆盖是指派生类中如果存在重新定义的函数，其函数名、参数列、返回值类型必须同父类中的相对应被覆盖的函数严格一致。覆盖函数和被覆盖函数只有函数体不同，当派生类对象调用子类中该同名函数时会自动调用子类中的覆盖版本，而不是父类中的被覆盖函数版本。</p>
+<h5 id="成员函数被重载的特征："><a href="#成员函数被重载的特征：" class="headerlink" title="成员函数被重载的特征："></a>成员函数被重载的特征：</h5><p>（1）相同的范围（在同一个类中）；</p>
+<p>（2）函数名字相同（必须的，否则属于不同的函数了，更谈不上重载）；</p>
+<p>（3）参数类型或个数，至少有一种不同（如果都相同的话，就是函数的重定义了；还要注意的是：如果函数参数相同，仅返回值不同的话，不是重载函数，编译时会报“有歧义”的错误）；</p>
+<p>（4）virtual关键字可有可无（这个重载函数与虚函数一点关系没有，即使加上了也不是虚函数。如果在面试题中遇到了，纯粹是为了混淆你的思维，考察你对概念的理解）。</p>
+<h5 id="覆盖是指派生类函数覆盖基类函数，特征是："><a href="#覆盖是指派生类函数覆盖基类函数，特征是：" class="headerlink" title="覆盖是指派生类函数覆盖基类函数，特征是："></a>覆盖是指派生类函数覆盖基类函数，特征是：</h5><p><strong>（1）不同的范围（分别位于派生类与基类）；</strong></p>
+<p><strong>（2）函数名字相同；</strong></p>
+<p><strong>（3）参数相同（这就属于重定义函数了）；</strong></p>
+<p><strong>（4）基类函数必须有virtual关键字（这就是虚函数了）。</strong></p>
+<h4 id="令人迷惑的隐藏规则"><a href="#令人迷惑的隐藏规则" class="headerlink" title="令人迷惑的隐藏规则"></a>令人迷惑的隐藏规则</h4><p>本来仅仅区别重载与覆盖并不算困难，但是C++的隐藏规则使问题复杂性陡然增加。这里“隐藏”是指派生类的函数屏蔽了与其同名的基类函数，规则如下： </p>
+<p><strong>（1）如果派生类的函数与基类的函数同名，但是参数不同。此时，不论有无virtual关键字，基类的函数将被隐藏（注意别与重载混淆）。</strong></p>
+<p><strong>（2）如果派生类的函数与基类的函数同名，并且参数也相同，但是基类函数没有virtual关键字。此时，基类的函数被隐藏（注意别与覆盖混淆；如果基类函数有virtual关键字，就属于函数的覆盖了）。</strong></p>
+<h4 id="关于虚函数与纯虚函数："><a href="#关于虚函数与纯虚函数：" class="headerlink" title="关于虚函数与纯虚函数："></a>关于虚函数与纯虚函数：</h4><p>定义一个函数为虚函数，不代表函数为不被实现的函数。</p>
+<p>定义它为虚函数是为了允许用基类的指针来调用子类的这个函数。</p>
+<p>定义一个函数为纯虚函数，才代表函数没有被实现。（这里好像有问题。。。）</p>
+<p>定义纯虚函数是为了实现一个接口，起到一个规范的作用，规范继承这个类的程序员必须实现这个函数。</p>
+<p>虚函数只能借助于指针或者引用来达到多态的效果</p>
+]]></content>
       <categories>
-          
-          <category> ROS基础操作 </category>
-          
+        <category>C++基础知识</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> ROS </tag>
-            
-        </tags>
-      
-    </entry>
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>创建指定OpenCV版本的ROS工程</title>
+    <url>/2020/12/19/chuang-jian-zhi-ding-opencv-ban-ben-ros-gong-cheng/</url>
+    <content><![CDATA[<h1 id="创建指定OpenCV版本的ROS工程"><a href="#创建指定OpenCV版本的ROS工程" class="headerlink" title="创建指定OpenCV版本的ROS工程"></a>创建指定OpenCV版本的ROS工程</h1><h3 id="一、创建工作空间和程序包"><a href="#一、创建工作空间和程序包" class="headerlink" title="一、创建工作空间和程序包"></a>一、创建工作空间和程序包</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> -p ~/catkin_cv/src
+
+<span class="token builtin class-name">cd</span> catkin_cv/
+
+catkin_make
+
+<span class="token builtin class-name">source</span> devel/setup.sh
+
+<span class="token builtin class-name">cd</span> src
+
+catkin_create_pkg ballseeker roscpp rospy std_msgs sensor_msgs cv_bridge image_transport dynamic_reconfigure<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="二、创建并且编写cpp文件与hpp文件"><a href="#二、创建并且编写cpp文件与hpp文件" class="headerlink" title="二、创建并且编写cpp文件与hpp文件"></a>二、创建并且编写cpp文件与hpp文件</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">gedit ballseeker/include/ballseeker/seek.hpp
+
+gedit ballseeker/src/seek.cpp
+
+gedit ballseeker/src/seekernode.cpp
+<span class="token comment">#代码见附录</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="三、修改CMakeLists-txt"><a href="#三、修改CMakeLists-txt" class="headerlink" title="三、修改CMakeLists.txt"></a>三、修改CMakeLists.txt</h3><p>​        在CMakeLists最后加上：</p>
+<pre class="line-numbers language-cmake" data-language="cmake"><code class="language-cmake"><span class="token comment"># catkin_add_nosetests(test)</span>
+<span class="token keyword">set</span><span class="token punctuation">(</span>OpenCV_DIR   /usr/local/share/OpenCV4<span class="token punctuation">)</span>
+<span class="token keyword">find_package</span><span class="token punctuation">(</span>OpenCV REQUIRED<span class="token punctuation">)</span>
+
+<span class="token keyword">add_library</span><span class="token punctuation">(</span><span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span>  src/seek.cpp<span class="token punctuation">)</span>
+
+<span class="token keyword">add_dependencies</span><span class="token punctuation">(</span>
+   <span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span> 
+   <span class="token punctuation">${</span><span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span>_EXPORTED_TARGETS<span class="token punctuation">}</span> 
+   <span class="token punctuation">${</span>catkin_EXPORTED_TARGETS<span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+
+<span class="token keyword">target_link_libraries</span><span class="token punctuation">(</span>
+   <span class="token punctuation">${</span><span class="token variable">PROJECT_NAME</span><span class="token punctuation">}</span>
+   <span class="token punctuation">${</span>catkin_LIBRARIES<span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+
+<span class="token comment">#add the publisher example  </span>
+
+<span class="token keyword">add_executable</span><span class="token punctuation">(</span>seekernode src/seek.cpp include/ballseeker/seek.hpp src/seekernode.cpp<span class="token punctuation">)</span>  
+<span class="token keyword">target_link_libraries</span><span class="token punctuation">(</span>seekernode <span class="token punctuation">${</span>catkin_LIBRARIES<span class="token punctuation">}</span> <span class="token punctuation">${</span>OpenCV_LIBRARIES<span class="token punctuation">}</span><span class="token punctuation">)</span>   <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="四、编译与运行"><a href="#四、编译与运行" class="headerlink" title="四、编译与运行"></a>四、编译与运行</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> catkin_cv/
+
+<span class="token builtin class-name">source</span> ~/catkin_cv/devel/setup.sh
+
+catkin_make
+<span class="token comment">#新开一个终端运行：</span>
+roscore
+<span class="token comment">#再回之前的终端运行：</span>
+rosrun ballseeker seekernode<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="五、编写launch文件快速启动"><a href="#五、编写launch文件快速启动" class="headerlink" title="五、编写launch文件快速启动"></a>五、编写launch文件快速启动</h3><p>​        在终端中运行：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> ~/catkin_cv/src/ballseeker/launch
+
+gedit quickstart.launch<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>​        在quickstart.launch中写入：</p>
+<pre class="line-numbers language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>launch</span><span class="token punctuation">&gt;</span></span>
     
-    
-    
-    <entry>
-      <title>C++描述符delete与override</title>
-      <link href="2020/08/21/delete-yu-override/"/>
-      <url>2020/08/21/delete-yu-override/</url>
-      
-        <content type="html"><![CDATA[<h1 id="delete与override"><a href="#delete与override" class="headerlink" title="delete与override"></a>delete与override</h1><h2 id="优先使用delete关键字删除函数而非private却又不实现的函数"><a href="#优先使用delete关键字删除函数而非private却又不实现的函数" class="headerlink" title="优先使用delete关键字删除函数而非private却又不实现的函数"></a>优先使用delete关键字删除函数而非private却又不实现的函数</h2><h3 id="为什么使用delete？"><a href="#为什么使用delete？" class="headerlink" title="为什么使用delete？"></a>为什么使用delete？</h3><p>​    不想让别的开发者调用特定的函数,你只需要不声明这个函数就可以了。但有时候 C++为你声明了一些函数,如果你想阻止客户调用这些函数,就不是那么容易的事了。</p><p>​    这种情况只有对“特殊的成员函数”才会出现,即这个成员函数是需要的时候C++自动生成的。    </p><p>在C++98中阻止这类函数被使用的方法是将这些函数声明为private,并且不定义它们。</p><p>​    将这些函数声明为私有来阻止客户调用他们。故意不定义它们是因为,如果有函数访问这些<br>函数(通过成员函数或者友好类)在链接的时候会导致没有定义而触发的错误。</p><p>​    在C++11中,有一个更好的方法可以基本上实现同样的功能:用 =delete标识拷贝复制函数<br>和拷贝赋值函数为删除的函数deleted functions 。</p><h3 id="delete的优点"><a href="#delete的优点" class="headerlink" title="delete的优点"></a>delete的优点</h3><p>​    删除函数一个重要的优势是任何函数都可以是删除的,然而仅有成员函数才可以是私有的。</p><h4 id="防止普通非成员函数中的隐式转化"><a href="#防止普通非成员函数中的隐式转化" class="headerlink" title="防止普通非成员函数中的隐式转化"></a>防止普通非成员函数中的隐式转化</h4><p>​    C++继承于C意味着,很多其他类型被隐式的转换为in 类型,但是有些调用可以编译但是没有任何意义.</p><p>​    举个例子,加入我们有个非成员函数,以一个整数位参数,然后返回这个参数是不是幸运数字:</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">bool isLucky(int number);isLucky('a');isLucky(true);isLucky(3.5);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>​    如果幸运数字一定要是一个整数,我们希望能到阻止上面那种形式的调用。</p><p>​    完成这个任务的一个方法是为想被排除出去的类型的重载函数声明为删除的:</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">bool isLucky(int number);bool isLucky(char)=delete;bool isLucky(bool)=delete;bool isLucky(double)=delete;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>​    如果给float一个转换为int或者double的可能性, C++总是倾向于转化为double的。以float类型调用isLucky总是调用对应的double重载,而不是int类型的那个重载。结果就是将double类型的重载删除将会阻止float类型的调用编译。</p><h4 id="阻止应该被禁用的模板实现"><a href="#阻止应该被禁用的模板实现" class="headerlink" title="阻止应该被禁用的模板实现"></a>阻止应该被禁用的模板实现</h4><p>​    假设你需要使用一个内嵌指针的模板：</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;void processPointer(T* ptr);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre><p>​    但是在指针家族中，有两个特殊的指针。</p><p>一个是 void* 指针，因为没有办法对它们解析引用，递增或者递减。</p><p>另一个是 char* 指针，因为它们往往表示指向C类型的字符串，而不是指向独立字符的指针。</p><p>​    这些特殊情况经常需要特殊处理。如果希望不能以 void* 或者 char* 为参数调用该函数，只需要删除这些实现：</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;&gt;void processPointer&lt;void*&gt;(void*)=delete;template&lt;&gt;void processPointer&lt;void*&gt;(void*)=delete;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>现在，使用 void* 或者 char* 调用该函数都是无效的，但使用 const void* 或者 const char* 调用也需要是无效的， 所以这些实现也需要被删除。（略）</p><p>如果类内部有一个函数模板，想通过声明它们为私有来禁止某些实现，是做不到的，因为赋予一个成员函数模板的某种特殊情况下的拥有不同于模板主体的访问权限是不可能的。</p><p>（可以声明 void* 和 char* 的版本却不实现它们 ）</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class MyClass{public:template&lt;typename T&gt;void function(T t);private:template&lt;&gt;//错误！！！void function(char);};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>并且模板的特殊情况必须要写在命名空间的作用域内，而不是类的作用域内。</p><p>不过，这个问题对于删除函数是不存在的，它们也可以在类外被声明为是被删除的（也就是在命名空间的作用域内）</p><h3 id="delete的注意事项"><a href="#delete的注意事项" class="headerlink" title="delete的注意事项"></a>delete的注意事项</h3><p>​    删除的函数不能通过任何方式被使用</p><p>​    方便起见,删除函数被声明为公有的,而不是私有的。这样设计的原因是,当客户端程序尝试使用一个成员函数的时候, C++会在检查删除状态之前检查可访问权限。当客户端代码尝试访问一个删除的私有函数时,一些编译器仅仅会警报该函数为私有,尽管这里函数的可访问性并不本质上影响它是否可以被使用。当把私有未定义的函数改为对应的删除函数时,牢记这一点是很有意义的,因为使这个函数为公有的可以产生更易读的错误信息。</p><h3 id="小结："><a href="#小结：" class="headerlink" title="小结："></a>小结：</h3><ol><li>优先使用删除函数而不是私有而不定义的函数</li><li>任何函数都可以被声明为删除，包括非成员函数和模板实现</li></ol><h3 id="扩展："><a href="#扩展：" class="headerlink" title="扩展："></a>扩展：</h3><h4 id="对于成员函数："><a href="#对于成员函数：" class="headerlink" title="对于成员函数："></a>对于成员函数：</h4><ol><li>被delete了还是可以重载的</li><li>被delete了，里面写个默认参数没问题</li><li>delete函数可以被继承的！！！（看IDE的报错）(但不能用)</li><li>私有的delete函数被类用户使用了会以“使用私有成员函数”的名义报错</li><li>delete函数不能够被定义，只能够被声明</li></ol><h4 id="对于普通函数："><a href="#对于普通函数：" class="headerlink" title="对于普通函数："></a>对于普通函数：</h4><ol><li>可以防止不想要的隐式转化</li><li>但删除一种类型的，可能会影响不止一种类型的隐式转化（会导致其他类型的不明确，ambiguous）</li><li>模板类的删除方式有两种，一种使用template，一种直接写出（暂时没发现会出啥问题）</li></ol><h2 id="使用override关键字声明覆盖的函数"><a href="#使用override关键字声明覆盖的函数" class="headerlink" title="使用override关键字声明覆盖的函数"></a>使用override关键字声明覆盖的函数</h2><p>在C++98中，如果要发生函数的覆盖，必须满足以下几个条件：</p><ul><li>基类中的函数必须是虚函数</li><li>基类和派生类中函数的名字必须完全相同（析构函数除外）</li><li>基类和派生类中的函数形参类型必须完全一样</li><li>基类和派生类中的函数的常量特性必须完全一样</li><li>基类和派生类中的函数返回值和异常声明必须是兼容的</li></ul><p>在C++11中，还有一条：</p><ul><li><p>基类和派生类的引用修饰符必须完全一样</p><p>（引用修饰符是为了实现限制成员函数仅用于左值或者右值）</p></li></ul><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class Widget{public:    void doWork() &amp;;//只有*this为左值时，这个版本才会被调用    void doWork() &amp;&amp;;//只有*this为右值时，这个函数才会被调用};Widget makeWidget();//工厂函数，返回右值Widget w;//正常对象（左值）w.doWork();//调用了Widget::doWork &amp;makeWidget().doWork();//调用了Widget::doWork &amp;&amp;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>正是因为覆盖有这么多的要求，所以一个很小的错误都可以造成很大的偏差。并且覆盖函数中出现的错误通常还是合法的，，但它导致的结果并不是你想要的。所以当你犯了某些错误的时候，你并不能依赖于编译器对你的通知。</p><p>例如下面这个例子，这些代码是完全合法的，但它一个虚函数都没有被覆盖——没有任何一个派生类的函数是和基类的对应函数绑定的。</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">classBase{public:    virtualvoidmf1()const;    virtualvoidmf2(intx);    virtualvoidmf3()&amp;;    voidmf4()const;};classDerived:publicBase{public:    virtualvoidmf1();    virtualvoidmf2(unsignedintx);    virtualvoidmf3()&amp;&amp;;    voidmf4()const;};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>提示：</p><ul><li>mf1在Base中声明常成员函数,但是在Derived中没有</li><li>mf2在Base中以int为参数,但是在Derived中以unsigned int为参数</li><li>mf3在Base中有左值修饰符,但是在Derived中是右值修饰符</li><li>mf4没有继承Base中的虚函数</li></ul><p>因为声明派生类的覆盖函数很重要，又如此容易出错，所以C++11提供了一种方法来显示的标明派生类中的函数是为了改写基类的版本，为其加上override声明即可。</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">classDerived:publicBase {public:    virtual void mf1() override;    virtual void mf2(unsigned int x) override;    virtual void mf3() &amp;&amp; override;    virtual void mf4() const override;};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p>这样，上面这些代码就无法通过编译了，并且编译器会把覆盖函数所有的问题揭露出来。</p><h3 id="扩展：-1"><a href="#扩展：-1" class="headerlink" title="扩展："></a>扩展：</h3><h4 id="与成员函数有关的几个描述符："><a href="#与成员函数有关的几个描述符：" class="headerlink" title="与成员函数有关的几个描述符："></a>与成员函数有关的几个描述符：</h4><ol><li>成员函数前面使用const 表示返回值为const</li><li>成员函数后面加 const表示函数不可以修改class的成员</li><li>如果<strong>派生类</strong>在虚函数声明时使用了override描述符，那么该函数必须重载其基类中的同名函数，否则代码将无法通过编译。</li><li>当不希望某个类被继承，或不希望某个虚函数被重写，可以在类名和虚函数后添加final关键字，添加final关键字后被继承或重写，编译器会报错</li></ol><h4 id="重载与覆盖"><a href="#重载与覆盖" class="headerlink" title="重载与覆盖"></a>重载与覆盖</h4><p>​    覆盖是指派生类中如果存在重新定义的函数，其函数名、参数列、返回值类型必须同父类中的相对应被覆盖的函数严格一致。覆盖函数和被覆盖函数只有函数体不同，当派生类对象调用子类中该同名函数时会自动调用子类中的覆盖版本，而不是父类中的被覆盖函数版本。</p><h5 id="成员函数被重载的特征："><a href="#成员函数被重载的特征：" class="headerlink" title="成员函数被重载的特征："></a>成员函数被重载的特征：</h5><p>（1）相同的范围（在同一个类中）；</p><p>（2）函数名字相同（必须的，否则属于不同的函数了，更谈不上重载）；</p><p>（3）参数类型或个数，至少有一种不同（如果都相同的话，就是函数的重定义了；还要注意的是：如果函数参数相同，仅返回值不同的话，不是重载函数，编译时会报“有歧义”的错误）；</p><p>（4）virtual关键字可有可无（这个重载函数与虚函数一点关系没有，即使加上了也不是虚函数。如果在面试题中遇到了，纯粹是为了混淆你的思维，考察你对概念的理解）。</p><h5 id="覆盖是指派生类函数覆盖基类函数，特征是："><a href="#覆盖是指派生类函数覆盖基类函数，特征是：" class="headerlink" title="覆盖是指派生类函数覆盖基类函数，特征是："></a>覆盖是指派生类函数覆盖基类函数，特征是：</h5><p><strong>（1）不同的范围（分别位于派生类与基类）；</strong></p><p><strong>（2）函数名字相同；</strong></p><p><strong>（3）参数相同（这就属于重定义函数了）；</strong></p><p><strong>（4）基类函数必须有virtual关键字（这就是虚函数了）。</strong></p><h4 id="令人迷惑的隐藏规则"><a href="#令人迷惑的隐藏规则" class="headerlink" title="令人迷惑的隐藏规则"></a>令人迷惑的隐藏规则</h4><p>本来仅仅区别重载与覆盖并不算困难，但是C++的隐藏规则使问题复杂性陡然增加。这里“隐藏”是指派生类的函数屏蔽了与其同名的基类函数，规则如下： </p><p><strong>（1）如果派生类的函数与基类的函数同名，但是参数不同。此时，不论有无virtual关键字，基类的函数将被隐藏（注意别与重载混淆）。</strong></p><p><strong>（2）如果派生类的函数与基类的函数同名，并且参数也相同，但是基类函数没有virtual关键字。此时，基类的函数被隐藏（注意别与覆盖混淆；如果基类函数有virtual关键字，就属于函数的覆盖了）。</strong></p><h4 id="关于虚函数与纯虚函数："><a href="#关于虚函数与纯虚函数：" class="headerlink" title="关于虚函数与纯虚函数："></a>关于虚函数与纯虚函数：</h4><p>定义一个函数为虚函数，不代表函数为不被实现的函数。</p><p>定义它为虚函数是为了允许用基类的指针来调用子类的这个函数。</p><p>定义一个函数为纯虚函数，才代表函数没有被实现。（这里好像有问题。。。）</p><p>定义纯虚函数是为了实现一个接口，起到一个规范的作用，规范继承这个类的程序员必须实现这个函数。</p><p>虚函数只能借助于指针或者引用来达到多态的效果</p>]]></content>
-      
-      
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>node</span>
+		<span class="token attr-name">pkg</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span> <span class="token punctuation">"</span>ballseeker<span class="token punctuation">"</span></span>
+		<span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>quickseeknode<span class="token punctuation">"</span></span> 
+		<span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>seekernode<span class="token punctuation">"</span></span>
+	<span class="token punctuation">/&gt;</span></span>
+
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>launch</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​        回到终端再运行：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">source</span> ~/catkin_cv/devel/setup.sh
+
+roslaunch ballseeker quickstart.launch<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h3 id="六、dynamic-reconfigure"><a href="#六、dynamic-reconfigure" class="headerlink" title="六、dynamic_reconfigure"></a>六、dynamic_reconfigure</h3><p>​        略</p>
+<h3 id="七、调整与保存参数"><a href="#七、调整与保存参数" class="headerlink" title="七、调整与保存参数"></a>七、调整与保存参数</h3><p>​        略</p>
+<h3 id="八、附录（示例代码）"><a href="#八、附录（示例代码）" class="headerlink" title="八、附录（示例代码）"></a>八、附录（示例代码）</h3><blockquote>
+<p>注意：这里的代码的作用是调用摄像头来检测它看到的网球</p>
+</blockquote>
+<p>​        在seek.hpp中写入：</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#pragma once
+#include "ros/ros.h"
+#include "opencv2/opencv.hpp"
+#include "vector"
+#include "sstream"
+
+const int red_ball = 0;
+const int yellow_ball = 1;
+const int blue_ball = 2;
+
+class seek
+{
+public:
+    seek(int service_id=0);
+    ~seek();
+    void getstart();        //从摄像头获取图片、双边滤波、转化hsv
+    void display();         //找球并展示中间效果和最终效果
+    void creatbar();        //创建滑动条调整参数
+
+private:
+    int bgr_min[3];
+    int bgr_max[3];
+    int hsv_min[3];
+    int hsv_max[3];
+
+    cv::Mat src;
+    cv::Mat bgr_dst;
+    cv::Mat hsv_dst;
+
+    cv::Mat see_red;
+    cv::Mat see_yellow;
+    cv::Mat see_blue;
+
+    cv::VideoCapture capture;
+    void updateparam(int type_of_ball);
+    void process(cv::Mat&amp; input,int type_of_ball);//阈值化、膨胀、找轮廓、找矩形并筛选、画圆
+    static void on_change(int, void*);
+};<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​        在seek.cpp中写入：</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include "../include/ballseeker/seek.hpp"
+
+seek::seek(int service_id)
+{
+    //设置摄像机参数
+    capture.open(1);
+    capture.set(CV_CAP_PROP_FRAME_WIDTH,640);
+	capture.set(CV_CAP_PROP_FRAME_HEIGHT,480);
+}
+
+seek::~seek()
+{
+
+}
+
+void seek::getstart()
+{
+    capture&gt;&gt;src;
+    cv::bilateralFilter(src,bgr_dst,20,1000,1000);
+    cv::cvtColor(bgr_dst,hsv_dst,CV_BGR2HSV);
+}
+
+void seek::display()
+{
+    process(see_red,red_ball);       //可能得会用bgr处理红球了，HSV下效果不太好
+    process(see_yellow,yellow_ball);
+    process(see_blue,blue_ball);
+    cv::imshow("SEE_RED_BALL",see_red);
+    cv::imshow("SEE_YELLOW_BALL",see_yellow);
+    cv::imshow("SEE_BLUE_BALL",see_blue);
+
+    cv::imshow("FINALLY",src);
+
+    cv::waitKey(30);
+}
+
+void seek::process(cv::Mat&amp; input, int type_of_ball)
+{
+    updateparam(type_of_ball);
+
+    cv::inRange(hsv_dst,cv::Scalar(hsv_min[0],hsv_min[1],hsv_min[2]),
+        cv::Scalar(hsv_max[0],hsv_max[1],hsv_max[2]),input);
+
+    cv::Mat element =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15, 15));   
+    cv::dilate(input, input, element);
+
+    std::vector&lt;std::vector&lt;cv::Point&gt; &gt; contours;
+    std::vector&lt;cv::Vec4i&gt; hierarchy;
+    std::vector&lt;cv::Rect&gt; rects;
+
+    cv::findContours(input, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
+
+    for (int i = 0; i &lt; contours.size(); i++)
+    {
+        rects.push_back(cv::boundingRect(contours[i]));
+        if ((rects.back().height &lt; 100 || rects.back().width &lt; 100) ||
+            fabsf(rects.back().height - rects.back().width) &gt; 20)
+            rects.erase(rects.end() - 1);
+    }
+
+    for (int i = 0; i &lt; rects.size(); i++)
+    {
+        double R = (rects[i].height + rects[i].width) / 4;
+        double x = rects[i].x + R;
+        double y = rects[i].y + R;
+        cv::Point center(x, y);
+        cv::circle(src, center, R + 5, cv::Scalar(0, 0, 255), 5);
+    }
+}
+
+void seek::updateparam(int type_of_ball)
+{
+    switch (type_of_ball)
+    {
+    case red_ball:
+        hsv_min[0]= 0 ;hsv_min[1]= 105 ;hsv_min[2]= 108 ;
+        hsv_max[0]= 11 ;hsv_max[1]= 255 ;hsv_max[1]= 255 ;
+        break;
+    case yellow_ball:
+        hsv_min[0]= 18 ;hsv_min[1]= 56 ;hsv_min[2]= 177 ;
+        hsv_max[0]= 71 ;hsv_max[1]= 187 ;hsv_max[1]= 255 ;
+        break;
+    case blue_ball:
+        hsv_min[0]= 85 ;hsv_min[1]= 129 ;hsv_min[2]= 128 ;
+        hsv_max[0]= 124 ;hsv_max[1]= 255 ;hsv_max[1]= 255 ;
+        break;
+    default:
+        break;
+    }
+}
+
+void seek::creatbar()
+{
+    cv::namedWindow("SetParam");
+	cv::createTrackbar("minH", "SetParam", &amp;hsv_min[0], 180, on_change);
+	cv::createTrackbar("minS", "SetParam", &amp;hsv_min[1], 255, on_change);
+	cv::createTrackbar("minV", "SetParam", &amp;hsv_min[2], 255, on_change);
+	cv::createTrackbar("maxH", "SetParam", &amp;hsv_max[0], 180, on_change);
+	cv::createTrackbar("maxS", "SetParam", &amp;hsv_max[1], 255, on_change);
+	cv::createTrackbar("maxV", "SetParam", &amp;hsv_max[2], 255, on_change);
+	on_change(0, 0);
+}
+
+void seek::on_change(int, void*)
+{
+
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​        在seekernode.cpp中写入：</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include "../include/ballseeker/seek.hpp"
+
+
+int main(int argc,char** argv)
+{
+    ros::init(argc,argv,"seekernode");
+    ros::NodeHandle n;
+
+    seek icu(1);
+    icu.creatbar();
+
+    while(ros::ok())
+    {
+        icu.getstart();
+        icu.display();
+        ros::spinOnce();
+    }
+
+    return 0;
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>]]></content>
       <categories>
-          
-          <category> C++基础知识 </category>
-          
+        <category>计算机视觉</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> C++ </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>类的六个默认的成员函数</title>
-      <link href="2020/08/21/lei-de-liu-ge-mo-ren-de-cheng-yuan-han-shu/"/>
-      <url>2020/08/21/lei-de-liu-ge-mo-ren-de-cheng-yuan-han-shu/</url>
-      
-        <content type="html"><![CDATA[<h1 id="类的六个默认的成员函数"><a href="#类的六个默认的成员函数" class="headerlink" title="类的六个默认的成员函数"></a>类的六个默认的成员函数</h1><h2 id="类的6个默认的成员函数包括："><a href="#类的6个默认的成员函数包括：" class="headerlink" title="类的6个默认的成员函数包括："></a>类的6个默认的成员函数包括：</h2><p>构造函数、析构函数、拷贝构造函数、赋值运算符重载函数、取地址操作符重载、const修饰的取地址操作符重载。</p><h3 id="（一）构造函数"><a href="#（一）构造函数" class="headerlink" title="（一）构造函数"></a>（一）构造函数</h3><p>构造函数，顾名思义，为对象分配空间，进行初始化。它是一种特殊的成员函数，具有以下特点:</p><ol><li><p>函数名与类名相同。</p></li><li><p>无返回值。</p></li><li><p>构造对象的时候系统会自动调用构造函数。</p></li><li><p>可以重载。</p></li><li><p>可以在类中定义，也可以在类外定义。</p></li><li><p>如果类中没有给出构造函数，编译器会自动产生一个缺省的构造函数，如果类中有构造函数，编译器就不会产生缺省构造函数。</p></li><li><p>全缺省的构造函数和无参的构造函数只能有一个，否则调用的时候就会产生冲突。</p></li><li><p>没有this指针。因为构造函数才是创建对象的，没有创建对象就不会有对象的首地址。</p></li></ol><p>构造函数，说来就是给成员变量进行初始化。而初始化却有两种方法：初始化列表、构造函数函数体内赋值。尽量使用初始化列表，因为它更高效。</p><h4 id="有些成员变量必须再初始化列表中初始化，比如："><a href="#有些成员变量必须再初始化列表中初始化，比如：" class="headerlink" title="有些成员变量必须再初始化列表中初始化，比如："></a>有些成员变量必须再初始化列表中初始化，比如：</h4><ol><li><p>常量成员变量。（常量创建时必须初始化，因为对于一个常量，我们给它赋值，是不对的）</p></li><li><p>引用类型成员变量。（引用创建时必须初始化）</p></li><li><p>没有缺省构造函数的类成员变量。（如果构造函数的参数列表中有一个类的对象，并且该对象的类里没有缺省参数的构造函数时，要是不使用初始化列表，参数中会调用无参或者全缺省的构造函数，而那个类中又没有。）</p></li></ol><h3 id="（二）析构函数"><a href="#（二）析构函数" class="headerlink" title="（二）析构函数"></a>（二）析构函数</h3><h4 id="析构函数是一种特殊的成员函数，具有以下特点："><a href="#析构函数是一种特殊的成员函数，具有以下特点：" class="headerlink" title="析构函数是一种特殊的成员函数，具有以下特点："></a>析构函数是一种特殊的成员函数，具有以下特点：</h4><ol><li><p>析构函数函数名是在类名加上字符 ~ 。</p></li><li><p>无参数无返回值（但有this指针）。</p></li><li><p>一个类有且只有一个析构函数，所以肯定不能重载。若未显示定义，系统会自动生成缺省的析构函数。</p></li><li><p>对象生命周期结束时，C++编译系统系统自动调用析构函数。</p></li><li><p>注意析构函数体内并不是删除对象，而是做一些清理工作。（比如我们在构造函数中动态开辟过一段空间，函数结束后需要释放，而系统自动生成的析构函数才不管内存释放呢，所以需要人为地写出析构函数）</p></li></ol><p>注意：对象生命周期结束后，后构造的对象先释放。</p><h3 id="（三）拷贝构造函数"><a href="#（三）拷贝构造函数" class="headerlink" title="（三）拷贝构造函数"></a>（三）拷贝构造函数</h3><p>用已有的对象创建一个新的对象。</p><p>创建对象时使用同类对象来进行初始化，这时所用的构造函数就是拷贝构造函数（Copy  Constructor）。拷贝构造函数也是构造函数，但它只有一个参数，这个参数只能是本类的一个对象，而且采用对象的常引用形式。拷贝构造函数的作用就是将实参对象的各成员值一一赋给新的对象中对应的成员。</p><p>该函数的参数是一个常引用，如果不是引用，形参是实参的一份临时拷贝，由于两者都是对象，此时就会调用自己的拷贝构造函数，陷入无限递归中…….</p><h4 id="拷贝构造函数的特征"><a href="#拷贝构造函数的特征" class="headerlink" title="拷贝构造函数的特征"></a>拷贝构造函数的特征</h4><p> （1）拷贝构造函数其实是一个构造函数的重载。<br> （2）拷贝构造函数的参数必须使用引用传参，使用传参方式会引发无穷递归调用。<br> （3）若为显示定义，系统默认生成缺省的拷贝构造函数，缺省的拷贝构造函数会按照成员的声明顺序依次拷贝类成员进行初始化</p><h4 id="调用拷贝构造函数的两种方法："><a href="#调用拷贝构造函数的两种方法：" class="headerlink" title="调用拷贝构造函数的两种方法："></a>调用拷贝构造函数的两种方法：</h4><ol><li><p>代入法：</p><p>Person p2(p1);</p></li><li><p>赋值法：</p><p>Person p2 = p1;</p></li></ol><h4 id="为什么这里的对象可以直接访问私有成员变量？"><a href="#为什么这里的对象可以直接访问私有成员变量？" class="headerlink" title="为什么这里的对象可以直接访问私有成员变量？"></a>为什么这里的对象可以直接访问私有成员变量？</h4><p> 1）在类的成员函数里可以直接访问同类对象的私有或保护的成员。<br> 2）C++的访问限定符是以类为单位的，即：在这个单位内的成员可以互相访问。</p><h3 id="（四）赋值运算符重载函数"><a href="#（四）赋值运算符重载函数" class="headerlink" title="（四）赋值运算符重载函数"></a>（四）赋值运算符重载函数</h3><p>用一个对象修改已经存在对象的内容，不是去创建新的对象，修改之后，两个对象的内容一致</p><blockquote><ol><li>可以通过检查是否给自己赋值，进行优化</li><li><strong>如果需要连续赋值，返回值不能是void，一般为引用类型</strong></li><li>*<em>返回值一般是 <em>this</em></em></li><li>编译器默认生成的赋值运算符为字节拷贝，即浅拷贝，如果资源需要拷贝，需要显示定义，完成深拷贝</li></ol><p>=调用：如果对象都存在，调用赋值运算符重载函数</p><p>​              如果左边对象不存在，调用拷贝构造创建左边对象</p></blockquote><p><em>赋值是从右向左进行的</em></p><p>如果不写，编译器会自动生成，默认生成的也是字节拷贝，浅拷贝</p><p>如果当前类中有资源，则必须显示定义运算符重载函数，完成深拷贝</p><h4 id="普通运算符重载函数"><a href="#普通运算符重载函数" class="headerlink" title="普通运算符重载函数"></a>普通运算符重载函数</h4><blockquote><ol><li>不能创建新的操作符，如operator@</li><li>重载操作符必须有一个类类型或者枚举类型的操作符</li><li>用于内置类型的操作符，其含义不能改变</li><li>运算符重载函数如果是成员函数，则参数的个数比运算符需要的个数少一个，这里编译器会传入this指针作为第一个参数</li><li>普通的运算符重载函数，参数的个数和运算符需要的个数一致</li></ol></blockquote><p><strong>.*（成员指针访问运算符） ,  ::  ,  sizeof  ,  ? :  ,  .   五个运算符不能被重载</strong></p><h3 id="（五）取地址运算符重载函数-const取地址运算符重载函数：获取对象的地址"><a href="#（五）取地址运算符重载函数-const取地址运算符重载函数：获取对象的地址" class="headerlink" title="（五）取地址运算符重载函数 / const取地址运算符重载函数：获取对象的地址**"></a>（五）取地址运算符重载函数 / const取地址运算符重载函数：获取对象的地址**</h3><p>一般不需要显示定义，直接使用编译器自动生成的即可</p>]]></content>
-      
-      
+      <tags>
+        <tag>OpenCV</tag>
+        <tag>ROS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>类的六个默认的成员函数</title>
+    <url>/2020/08/21/lei-de-liu-ge-mo-ren-de-cheng-yuan-han-shu/</url>
+    <content><![CDATA[<h1 id="类的六个默认的成员函数"><a href="#类的六个默认的成员函数" class="headerlink" title="类的六个默认的成员函数"></a>类的六个默认的成员函数</h1><h2 id="类的6个默认的成员函数包括："><a href="#类的6个默认的成员函数包括：" class="headerlink" title="类的6个默认的成员函数包括："></a>类的6个默认的成员函数包括：</h2><p>构造函数、析构函数、拷贝构造函数、赋值运算符重载函数、取地址操作符重载、const修饰的取地址操作符重载。</p>
+<h3 id="（一）构造函数"><a href="#（一）构造函数" class="headerlink" title="（一）构造函数"></a>（一）构造函数</h3><p>构造函数，顾名思义，为对象分配空间，进行初始化。它是一种特殊的成员函数，具有以下特点:</p>
+<ol>
+<li><p>函数名与类名相同。</p>
+</li>
+<li><p>无返回值。</p>
+</li>
+<li><p>构造对象的时候系统会自动调用构造函数。</p>
+</li>
+<li><p>可以重载。</p>
+</li>
+<li><p>可以在类中定义，也可以在类外定义。</p>
+</li>
+<li><p>如果类中没有给出构造函数，编译器会自动产生一个缺省的构造函数，如果类中有构造函数，编译器就不会产生缺省构造函数。</p>
+</li>
+<li><p>全缺省的构造函数和无参的构造函数只能有一个，否则调用的时候就会产生冲突。</p>
+</li>
+<li><p>没有this指针。因为构造函数才是创建对象的，没有创建对象就不会有对象的首地址。</p>
+</li>
+</ol>
+<p>构造函数，说来就是给成员变量进行初始化。而初始化却有两种方法：初始化列表、构造函数函数体内赋值。尽量使用初始化列表，因为它更高效。</p>
+<h4 id="有些成员变量必须再初始化列表中初始化，比如："><a href="#有些成员变量必须再初始化列表中初始化，比如：" class="headerlink" title="有些成员变量必须再初始化列表中初始化，比如："></a>有些成员变量必须再初始化列表中初始化，比如：</h4><ol>
+<li><p>常量成员变量。（常量创建时必须初始化，因为对于一个常量，我们给它赋值，是不对的）</p>
+</li>
+<li><p>引用类型成员变量。（引用创建时必须初始化）</p>
+</li>
+<li><p>没有缺省构造函数的类成员变量。（如果构造函数的参数列表中有一个类的对象，并且该对象的类里没有缺省参数的构造函数时，要是不使用初始化列表，参数中会调用无参或者全缺省的构造函数，而那个类中又没有。）</p>
+</li>
+</ol>
+<h3 id="（二）析构函数"><a href="#（二）析构函数" class="headerlink" title="（二）析构函数"></a>（二）析构函数</h3><h4 id="析构函数是一种特殊的成员函数，具有以下特点："><a href="#析构函数是一种特殊的成员函数，具有以下特点：" class="headerlink" title="析构函数是一种特殊的成员函数，具有以下特点："></a>析构函数是一种特殊的成员函数，具有以下特点：</h4><ol>
+<li><p>析构函数函数名是在类名加上字符 ~ 。</p>
+</li>
+<li><p>无参数无返回值（但有this指针）。</p>
+</li>
+<li><p>一个类有且只有一个析构函数，所以肯定不能重载。若未显示定义，系统会自动生成缺省的析构函数。</p>
+</li>
+<li><p>对象生命周期结束时，C++编译系统系统自动调用析构函数。</p>
+</li>
+<li><p>注意析构函数体内并不是删除对象，而是做一些清理工作。（比如我们在构造函数中动态开辟过一段空间，函数结束后需要释放，而系统自动生成的析构函数才不管内存释放呢，所以需要人为地写出析构函数）</p>
+</li>
+</ol>
+<p>注意：对象生命周期结束后，后构造的对象先释放。</p>
+<h3 id="（三）拷贝构造函数"><a href="#（三）拷贝构造函数" class="headerlink" title="（三）拷贝构造函数"></a>（三）拷贝构造函数</h3><p>用已有的对象创建一个新的对象。</p>
+<p>创建对象时使用同类对象来进行初始化，这时所用的构造函数就是拷贝构造函数（Copy  Constructor）。拷贝构造函数也是构造函数，但它只有一个参数，这个参数只能是本类的一个对象，而且采用对象的常引用形式。拷贝构造函数的作用就是将实参对象的各成员值一一赋给新的对象中对应的成员。</p>
+<p>该函数的参数是一个常引用，如果不是引用，形参是实参的一份临时拷贝，由于两者都是对象，此时就会调用自己的拷贝构造函数，陷入无限递归中…….</p>
+<h4 id="拷贝构造函数的特征"><a href="#拷贝构造函数的特征" class="headerlink" title="拷贝构造函数的特征"></a>拷贝构造函数的特征</h4><p> （1）拷贝构造函数其实是一个构造函数的重载。<br> （2）拷贝构造函数的参数必须使用引用传参，使用传参方式会引发无穷递归调用。<br> （3）若为显示定义，系统默认生成缺省的拷贝构造函数，缺省的拷贝构造函数会按照成员的声明顺序依次拷贝类成员进行初始化</p>
+<h4 id="调用拷贝构造函数的两种方法："><a href="#调用拷贝构造函数的两种方法：" class="headerlink" title="调用拷贝构造函数的两种方法："></a>调用拷贝构造函数的两种方法：</h4><ol>
+<li><p>代入法：</p>
+<p>Person p2(p1);</p>
+</li>
+<li><p>赋值法：</p>
+<p>Person p2 = p1;</p>
+</li>
+</ol>
+<h4 id="为什么这里的对象可以直接访问私有成员变量？"><a href="#为什么这里的对象可以直接访问私有成员变量？" class="headerlink" title="为什么这里的对象可以直接访问私有成员变量？"></a>为什么这里的对象可以直接访问私有成员变量？</h4><p> 1）在类的成员函数里可以直接访问同类对象的私有或保护的成员。<br> 2）C++的访问限定符是以类为单位的，即：在这个单位内的成员可以互相访问。</p>
+<h3 id="（四）赋值运算符重载函数"><a href="#（四）赋值运算符重载函数" class="headerlink" title="（四）赋值运算符重载函数"></a>（四）赋值运算符重载函数</h3><p>用一个对象修改已经存在对象的内容，不是去创建新的对象，修改之后，两个对象的内容一致</p>
+<blockquote>
+<ol>
+<li>可以通过检查是否给自己赋值，进行优化</li>
+<li><strong>如果需要连续赋值，返回值不能是void，一般为引用类型</strong></li>
+<li>*<em>返回值一般是 <em>this</em></em></li>
+<li>编译器默认生成的赋值运算符为字节拷贝，即浅拷贝，如果资源需要拷贝，需要显示定义，完成深拷贝</li>
+</ol>
+<p>=调用：如果对象都存在，调用赋值运算符重载函数</p>
+<p>​              如果左边对象不存在，调用拷贝构造创建左边对象</p>
+</blockquote>
+<p><em>赋值是从右向左进行的</em></p>
+<p>如果不写，编译器会自动生成，默认生成的也是字节拷贝，浅拷贝</p>
+<p>如果当前类中有资源，则必须显示定义运算符重载函数，完成深拷贝</p>
+<h4 id="普通运算符重载函数"><a href="#普通运算符重载函数" class="headerlink" title="普通运算符重载函数"></a>普通运算符重载函数</h4><blockquote>
+<ol>
+<li>不能创建新的操作符，如operator@</li>
+<li>重载操作符必须有一个类类型或者枚举类型的操作符</li>
+<li>用于内置类型的操作符，其含义不能改变</li>
+<li>运算符重载函数如果是成员函数，则参数的个数比运算符需要的个数少一个，这里编译器会传入this指针作为第一个参数</li>
+<li>普通的运算符重载函数，参数的个数和运算符需要的个数一致</li>
+</ol>
+</blockquote>
+<p><strong>.*（成员指针访问运算符） ,  ::  ,  sizeof  ,  ? :  ,  .   五个运算符不能被重载</strong></p>
+<h3 id="（五）取地址运算符重载函数-const取地址运算符重载函数：获取对象的地址"><a href="#（五）取地址运算符重载函数-const取地址运算符重载函数：获取对象的地址" class="headerlink" title="（五）取地址运算符重载函数 / const取地址运算符重载函数：获取对象的地址**"></a>（五）取地址运算符重载函数 / const取地址运算符重载函数：获取对象的地址**</h3><p>一般不需要显示定义，直接使用编译器自动生成的即可</p>
+]]></content>
       <categories>
-          
-          <category> C++基础知识 </category>
-          
+        <category>C++基础知识</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> C++ </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>几种常见的颜色空间</title>
-      <link href="2020/08/17/colorspace/"/>
-      <url>2020/08/17/colorspace/</url>
-      
-        <content type="html"><![CDATA[<h1 id="颜色空间"><a href="#颜色空间" class="headerlink" title="颜色空间"></a>颜色空间</h1><p><strong>在计算机视觉，尤其颜色识别相关的算法中，rgb,hsv,lab颜色空间混用更是常用的方法。</strong></p><h2 id="RGB"><a href="#RGB" class="headerlink" title="RGB"></a>RGB</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>​    RGB颜色空间以R(Red:红)、G(Green:绿)、B(Blue:蓝)三种基本色为基础，进行不同程度的叠加，产生丰富而广泛的颜色，所以俗称三基色模式。在大自然中有无穷多种不同的颜色，而人眼只能分辨有限种不同的颜色，RGB模式可表示一千六百多万种不同的颜色，在人眼看来它非常接近大自然的颜色，故又称为自然色彩模式。红绿蓝代表可见光谱中的三种基本颜色或称为三原色，每一种颜色按其亮度的不同分为256个等级。当色光三原色重叠时，由于不同的混色比例能产生各种中间色，例如，三原色相加可产生白色。所以RGB模式是加色过程。屏幕显示的基础是RGB模式，彩色印刷品却无法用RGB模式来产生各种彩色，所以，<strong>RGB模式常用于视频、多媒体与网页设计</strong>。</p><h3 id="空间模型"><a href="#空间模型" class="headerlink" title="空间模型"></a>空间模型</h3><p>​    对图像处理而言，RGB是最为重要和常见的颜色模型，它建立在笛卡尔坐标系中，以红、绿、蓝三种基本色为基础，<strong>进行不同程度的叠加</strong>，产生丰富而广泛的颜色，俗称三基色模式。如下图所示：</p><p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9nc3MwLmJkc3RhdGljLmNvbS85NG8zZFNhZ194STRraEdrcG9XSzFIRjZoaHkvYmFpa2UvYzAlM0RiYWlrZTgwJTJDNSUyQzUlMkM4MCUyQzI2L3NpZ249MjdmYjUwZjlhYWVjMDhmYTMyMGQxYmY1Mzg4NzU2MDgvZTFmZTk5MjViYzMxNWM2MGU0NTA5ZmE5ODdiMWNiMTM0ODU0NzdhYi5qcGc?x-oss-process=image/format,png"></p><h3 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h3><p>​    RGB模型的原理来自于颜色的三刺激理论，它基于以下假设:在眼睛的中央部位有3种类型的对色彩敏感的锥状细胞。其中一类对位于可见光谱中间位置的光波敏感，这种光波经人的视觉系统转换产生绿色感。而其他两种锥状细胞对位于可见光波的上、下端即较长和较短的波长的光波敏感，它们分别被识别为红色和蓝色。从生理学的角度来看，由于眼睛仅包含3种不同类型的锥状细胞，因而对任意3种颜色适当混合均可产生白光视觉，条件是这3中颜色中任意两种的组合都并不能产生第3种颜色，则这三种颜色就被称为三原色。</p><h3 id="表达方式"><a href="#表达方式" class="headerlink" title="表达方式"></a>表达方式</h3><p>​     RGB空间是目前最常用的彩色信息表达方式，使用红、绿、蓝三原色的亮度来定量表示颜色，<strong>是以RGB三色光互相叠加来实现混色的方式</strong>。三种颜色所占比例不同，得到的颜色就不同。变换混合的比例，就会得到各种各样的混合效果。RGB颜色空间可以看作是三维直角坐标系中的一个单位正方体。任何一种颜色在RGB颜色空间中都可以用三维空间中的一个点来表示。在RGB颜色空间，任意色光F都可以用RGB三种颜色不同分量的相加混合而成：F=r[R]+g[G]+b[B]</p><h4 id="色度学规则："><a href="#色度学规则：" class="headerlink" title="色度学规则："></a>色度学规则：</h4><p> 　(1)通过R,G,B这三种颜色能产生任何颜色，并且这三种颜色混合后产生的颜色是唯一的。<br> 　(2)如果两个颜色相等，这三个颜色分量再乘以或者除以相同的数，得到的颜色仍然相等。<br> 　(3)混合色的亮度等于每种颜色亮度的和。</p><h3 id="优点与缺点"><a href="#优点与缺点" class="headerlink" title="优点与缺点"></a>优点与缺点</h3><p>​    优点： RGB颜色空间最大的优点就是直观，容易理解。</p><p>​    缺点：<strong>R,G,B这3个分量是高度相关的</strong>，即如果一个颜色的某一个分量发生了一定程度的改变，那么这个颜色很可能要发生改变；人眼对于常见的红绿蓝三色的敏感程度是不一样的，因此RGB颜色空间的均匀性非常差，且两种颜色之间的知觉差异色差不能表示为该颜色空间中两点间的距离，但是利用线性或非线性变换，则可以从RGB颜色空间推导出其他的颜色特征空间。</p><h2 id="HSV"><a href="#HSV" class="headerlink" title="HSV"></a>HSV</h2><h3 id="基本概念-1"><a href="#基本概念-1" class="headerlink" title="基本概念"></a>基本概念</h3><p>   HSV(Hue, Saturation, Value)是根据颜色的直观特性由A. R.  Smith在1978年创建的一种颜色空间, 也称六角锥体模型(Hexcone  Model)。这个模型中颜色的参数分别是：<strong>色调（H），饱和度（S），明度（V）</strong>。</p><h3 id="空间模型-1"><a href="#空间模型-1" class="headerlink" title="空间模型"></a>空间模型</h3><h4 id="色调H："><a href="#色调H：" class="headerlink" title="色调H："></a>色调H：</h4><p>​    用角度度量，取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°，绿色为120°,蓝色为240°。它们的补色是：黄色为60°，青色为180°,品红为300°；</p><h4 id="饱和度S："><a href="#饱和度S：" class="headerlink" title="饱和度S："></a>饱和度S：</h4><p>   饱和度S表示颜色接近光谱色的程度。一种颜色，可以看成是某种光谱色与白色混合的结果。其中光谱色所占的比例愈大，颜色接近光谱色的程度就愈高，颜色的饱和度也就愈高。饱和度高，颜色则深而艳。光谱色的白光成分为0，饱和度达到最高。通常取值范围为0%～100%，值越大，颜色越饱和。</p><h4 id="明度V："><a href="#明度V：" class="headerlink" title="明度V："></a>明度V：</h4><p>明度表示颜色明亮的程度，对于光源色，明度值与发光体的光亮度有关；对于物体色，此值和物体的透射比或反射比有关。通常取值范围为0%（黑）到100%（白）。</p><p><strong>RGB和CMY颜色模型都是面向硬件的，而HSV（Hue Saturation  Value）颜色模型是面向用户的。</strong>HSV模型的三维表示从RGB立方体演化而来。设想从RGB沿立方体对角线的白色顶点向黑色顶点观察，就可以看到立方体的六边形外形。六边形边界表示色彩，水平轴表示纯度，明度沿垂直轴测量。</p><p> <img src="https://img-blog.csdnimg.cn/20181128220932509.png"> </p><p> <img src="https://img-blog.csdnimg.cn/20181128220957174.png"></p><h3 id="从RGB到HSV的转换"><a href="#从RGB到HSV的转换" class="headerlink" title="从RGB到HSV的转换"></a>从RGB到HSV的转换</h3><p>​    HSV 在数学上定义为在 RGB 空间中的颜色的 R, G 和 B 的坐标的变换。设 (r, g, b) 分别是一个颜色的红、绿和蓝坐标，它们的值是在 0 到 1 之间的实数。设 max 等价于 r, g 和 b 中的最大者，设 min 等于这些值中的最小者。要找到在 HSV 空间中的 (h, s, v) 值，这里的 h ∈ [0,  360）是角度的色相角，而 s, v ∈ [0,1] 是饱和度和亮度，计算公式为：</p><p><img src="https://img-blog.csdnimg.cn/20181128221242343.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ppYW5nSHVpMTIxMQ==,size_16,color_FFFFFF,t_70"></p><p><img src="https://img-blog.csdnimg.cn/20181128221304329.png"></p><p><img src="https://img-blog.csdnimg.cn/2018112822132243.png"></p><p>​    HSV对用户来说是一种直观的颜色模型。我们可以从一种纯色彩开始，即指定色彩角H，并让V=S=1，然后我们可以通过向其中加入黑色和白色来得到我们需要的颜色。<strong>增加黑色可以减小V而S不变，同样增加白色可以减小S而V不变。</strong>例如，要得到深蓝色，V=0.4 S=1 H=240度。要得到淡蓝色，V=1 S=0.4 H=240度。</p><p>   一般说来，人眼最大能区分128种不同的色彩，130种色饱和度，23种明暗度。如果我们用16Bit表示HSV的话，可以用7位存放H，4位存放S，5位存放V，即745或者655就可以满足我们的需要了。</p><p>​    由于HSV是一种比较直观的颜色模型，所以在许多图像编辑工具中应用比较广泛，如Photoshop（在Photoshop中叫HSB）等等，但这也决定了<strong>它不适合使用在光照模型中，许多光线混合运算、光强运算等都无法直接使用HSV来实现。</strong></p><h2 id="LAB"><a href="#LAB" class="headerlink" title="LAB"></a>LAB</h2><h3 id="基本概念-2"><a href="#基本概念-2" class="headerlink" title="基本概念"></a>基本概念</h3><p>​     <a href="https://baike.baidu.com/item/Lab%E6%A8%A1%E5%BC%8F/7362402">Lab模式</a>是根据Commission International Eclairage（CIE）在1931年所制定的一种测定颜色的国际标准建立的。于1976年被改进，并且命名的一种色彩模式。Lab颜色模型弥补了<a href="https://baike.baidu.com/item/RGB/342517">RGB</a>和CMYK两种色彩模式的不足。它是一种<strong>设备无关的颜色模型</strong>，也是一种<strong>基于生理特征的颜色模型</strong>。 Lab颜色模型由三个要素组成，一个要素是亮度（L），a 和b是两个<a href="https://baike.baidu.com/item/%E9%A2%9C%E8%89%B2%E9%80%9A%E9%81%93/5706858">颜色通道</a>。a包括的颜色是从<a href="https://baike.baidu.com/item/%E6%B7%B1%E7%BB%BF%E8%89%B2/2192808">深绿色</a>（低亮度值）到灰色（中亮度值）再到亮粉红色（高亮度值）；b是从亮蓝色（低亮度值）到灰色（中亮度值）再到黄色（高亮度值）。因此，这种颜色混合后将产生具有明亮效果的色彩。</p><h3 id="空间模型-2"><a href="#空间模型-2" class="headerlink" title="空间模型"></a>空间模型</h3><p>​    <a href="https://baike.baidu.com/item/Lab%E6%A8%A1%E5%BC%8F/7362402">Lab模式</a>既不依赖光线，也不依赖于颜料，它是CIE组织确定的一个理论上包括了人眼可以看见的所有色彩的色彩模式。Lab模式弥补了<a href="https://baike.baidu.com/item/RGB/342517">RGB</a>和CMYK两种色彩模式的不足。同RGB颜色空间相比，Lab是一种不常用的色彩空间。它是一种设备无关的颜色系统，也是一种基于生理特征的颜色系统。这也就意味着，<strong>它是用数字化的方法来描述人的视觉感应</strong>。Lab颜色空间中的L分量用于表示像素的亮度，取值范围是[0,100],表示从纯黑到纯白；a表示从红色到绿色的范围，取值范围是[127,-128]；b表示从黄色到蓝色的范围，取值范围是[127,-128]。下图所示为Lab颜色空间的图示：</p><p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9nc3MzLmJkc3RhdGljLmNvbS8tUG8zZFNhZ194STRraEdrcG9XSzFIRjZoaHkvYmFpa2UvYzAlM0RiYWlrZTgwJTJDNSUyQzUlMkM4MCUyQzI2L3NpZ249ZTM1OWY1YTZhNDRiZDExMzEwYzBiZjYwM2JjNmNmNmEvMDIzYjViYjVjOWVhMTVjZTFkMWZmMWRjYmYwMDNhZjMzYjg3YjI3NS5qcGc?x-oss-process=image/format,png"></p><h3 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h3><p>​     <strong>Lab颜色空间比计算机显示器甚至比人类视觉的色域都要大 **，表示为Lab的位图比RGB或CMYK位图获得同样的精度需要要求更多的像素数据。<a href="https://baike.baidu.com/item/Lab%E6%A8%A1%E5%BC%8F/7362402">Lab模式</a>所定义的色彩最多，且与光线及设备无关并且</strong>处理速度与<a href="https://baike.baidu.com/item/RGB%E6%A8%A1%E5%BC%8F/7362104">RGB模式</a>同样快**，比<a href="https://baike.baidu.com/item/CMYK%E6%A8%A1%E5%BC%8F/305545">CMYK模式</a>快很多。因此，可以放心大胆的在图象编辑中使用Lab模 式。而且，Lab模式在转换成CMYK模式时色彩没有丢失或被替换。因此，最佳避免色彩损失的方法是：应用Lab模式编辑图象，再转换为CMYK模式打印 输出。</p><h2 id="CMYK"><a href="#CMYK" class="headerlink" title="CMYK"></a>CMYK</h2><h3 id="基本概念-3"><a href="#基本概念-3" class="headerlink" title="基本概念"></a>基本概念</h3><p>​    当阳光照射到一个物体上时，这个物体将吸收一部分光线，并将剩下的光线进行反射，反射的光线就是我们所看见的物体颜色。这是一种**减色<a href="https://baike.baidu.com/item/%E8%89%B2%E5%BD%A9%E6%A8%A1%E5%BC%8F/10209468">色彩模式</a>**，同时也是与<a href="https://baike.baidu.com/item/RGB%E6%A8%A1%E5%BC%8F">RGB模式</a>的根本不同之处。不但我们看物体的颜色时用到了这种减色模式，而且在纸上印刷时应用的也是这种减色模式。CMYK代表印刷上用的四种颜色，C代表青色（Cyan），M代表<a href="https://baike.baidu.com/item/%E6%B4%8B%E7%BA%A2%E8%89%B2/6833575">洋红色</a>（Magenta），Y代表黄色（Yellow），K代表黑色（Black）。因为在实际应用中，青色、洋红色和黄色很难叠加形成真正的黑色，最多不过是褐色而已。因此才引入了K——黑色。黑色的作用是强化暗调，加深暗部色彩。</p><h3 id="打印模式"><a href="#打印模式" class="headerlink" title="打印模式"></a>打印模式</h3><p>​     <strong>CMYK模式俗称四色打印模式，是最佳的打印模式</strong>。但是在进行实际打印时，两种模式存在转换问题，具体原因如下：</p><p>​     1. CMYK模式编辑虽然能够避免色彩的损失，但运算速度很慢。主要原因如下：</p><p>​        1）、即使在CMYK模式下工作，<a href="https://baike.baidu.com/item/Photoshop/133866">Photoshop</a>也必须将CMYK模式转变为显示器所使用的RGB模式。</p><p>​        2）、对于同样的图像，RGB模式只需要处理三个<a href="https://baike.baidu.com/item/%E9%80%9A%E9%81%93">通道</a>即可，而CMYK模式则需要处理四个。</p><p>​     2.  用户所使用的扫描仪和显示器都是<a href="https://baike.baidu.com/item/RGB/342517">RGB</a>设备，所以无论什么时候使用CMYK模式工作都有把RGB模式转换为CMYK模式这样一个过程。因此，是否应用CMYK模式进行编辑都存在<a href="https://baike.baidu.com/item/RGB%E6%A8%A1%E5%BC%8F/7362104">RGB模式</a>和CMYK模式转换的问题。</p><p>​    对于<a href="https://baike.baidu.com/item/RGB%E6%A8%A1%E5%BC%8F/7362104">RGB模式</a>和CMYK模式转换的问题，可以先用RGB模式进行编辑工作，再用CMYK模式进行打印工作，在打印前才进行转换，然后加入必要的<a href="https://baike.baidu.com/item/%E8%89%B2%E5%BD%A9%E6%A0%A1%E6%AD%A3/10786529">色彩校正</a>，<a href="https://baike.baidu.com/item/%E9%94%90%E5%8C%96/2189784">锐化</a>和修整。这样虽然使<a href="https://baike.baidu.com/item/Photoshop/133866">Photoshop</a>在CMYK模式下速度慢一些，但可节省大部分编辑时间。这种打印前的模式转换，并不是避免图像损失最佳的途径，最佳方法是将<a href="https://baike.baidu.com/item/Lab%E6%A8%A1%E5%BC%8F">Lab模式</a>和CMYK模式相结合使用，这样可以最大程度的减少图像失真。</p><h3 id="优缺点-1"><a href="#优缺点-1" class="headerlink" title="优缺点"></a>优缺点</h3><p>   优点：可以满足打印的需求，解决RGB不能打印的问题</p><p>   缺点：一定程度上存在色彩的缺失，运行速度慢</p>]]></content>
-      
-      
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>视觉SLAM十四讲笔记</title>
+    <url>/2021/01/27/shi-jue-slam-shi-si-jiang-bi-ji/</url>
+    <content><![CDATA[<h1 id="《视觉SLAM十四讲》笔记"><a href="#《视觉SLAM十四讲》笔记" class="headerlink" title="《视觉SLAM十四讲》笔记"></a>《视觉SLAM十四讲》笔记</h1><h2 id="第一、二讲-初识SLAM"><a href="#第一、二讲-初识SLAM" class="headerlink" title="第一、二讲    初识SLAM"></a>第一、二讲    <code>初识SLAM</code></h2><h3 id="一、知识总结"><a href="#一、知识总结" class="headerlink" title="一、知识总结"></a>一、知识总结</h3><ol>
+<li><p>slam英文为Simultaneous Localization and Mapping，意思是同时定位与建图。它指搭建特定的传感器的主体，在没有环境先验信息的情况下，在运动过程中建立环境的模型，同时估计自己的运动。当传感器主要为相机时，可称为‘视觉slam’。</p>
+</li>
+<li><p>slam技术应用在机器人定位导航，AR/VR、三feixianxingyouhua维重建等领域。</p>
+</li>
+<li><p>slam框架主要包括传感器信息读取、视觉里程计、后端优化、建图以及回环检测五部分。</p>
+<p><img src="/images/slam-notes/1.png"></p>
+<ul>
+<li>传感器信息的读取：主要为图像信息的读取和预处理。以及其他传感器如惯性传感器信息的读取和处理</li>
+<li>视觉里程计：估计相邻图像间的运动。单独的vo存在累计漂移问题。</li>
+<li>后端优化：对相机位姿和回环检测的信息进行优化，采用滤波和非线性优化方法，解决在带有噪声的数据中，估计整个系统的状态，以及状态估计的不确定性。目的是得到全局一致的轨迹和地图。</li>
+<li>建图：目的是解决位置估计随时间漂移的问题，建立与任务对应的地图。需要使机器人识别曾经到达过的场景的能力。如判断图像间相似性来完成回环检测。分为度量地图和拓扑地图。</li>
+</ul>
+</li>
+<li><p>拓扑地图：强调地图元素的关系，由节点和边组成，只考虑节点的联通性。</p>
+</li>
+<li><p>度量地图：强调精确地表示地图中物体的位置关系，用稀疏和稠密对它们进行分类。二维度量地图是许多个小格子组成，三维是方块。包括占据、空闲以及未知三种状态。</p>
+</li>
+</ol>
+<h3 id="二、数学表述"><a href="#二、数学表述" class="headerlink" title="二、数学表述"></a>二、数学表述</h3><ol>
+<li>运动方程</li>
+</ol>
+<p><img src="/images/slam-notes/2.png"></p>
+<ol start="2">
+<li><p>观测方程</p>
+<p><img src="/images/slam-notes/3.png"></p>
+</li>
+<li><p>符号意义x为机器人各时刻位置,y为路标，u为传感器的输入数据，w、v为噪声。z为观测数据。机器人在环境中移动可以描述为运动方程和观测方程，转化为求解定位x和建图y的问题。问题建模为一个状态估计问题。</p>
+</li>
+</ol>
+<h2 id="第三讲-三维空间刚体运动"><a href="#第三讲-三维空间刚体运动" class="headerlink" title="第三讲    三维空间刚体运动"></a>第三讲    <code>三维空间刚体运动</code></h2><ol>
+<li><p>内积：描述向量间的投影关系<br><img src="/images/slam-notes/4.png"></p>
+</li>
+<li><p>外积：外积的方向垂直a、b两个向量，大小为|a||b|sin&lt;a, b&gt;</p>
+</li>
+<li><p>它是两个向量张成的四边形的有向面积。外积只对三维向量存在定义，可以表示旋转^表示反对称符号，外积公式：<br><img src="/images/slam-notes/5.png"></p>
+</li>
+<li><p>欧氏变换：同一个向量在各个坐标系下的长度和夹角都不会发生变换，称为欧氏变换。</p>
+</li>
+<li><p>旋转矩阵：描述了旋转本身。它是行列式为1的正交矩阵。SO表示特殊正交群，集合定义如下：<br><img src="/images/slam-notes/6.png"></p>
+</li>
+<li><p>世界坐标系下向量a经过旋转R和平移t到a’描述一个欧氏空间完的变换关系。<br><img src="/images/slam-notes/7.png"></p>
+</li>
+<li><p>变换矩阵和齐次坐标是使用数学技巧，把转换关系变为线性关系。变换矩阵为特殊欧氏群，表示为：</p>
+<p><img src="/images/slam-notes/8.png"></p>
+</li>
+<li><p>欧拉角：把一个旋转分解成三次绕不同轴的旋转。使用前要定义方向，如：偏航-俯仰-滚转等价于ZYX旋转。</p>
+<p>欧拉角的一个重大缺点是会碰到著名的万向锁问题（Gimbal Lock）：在俯仰角为 ±90◦ 时，第一次旋转与第三次旋转将使用同一个轴，使得系统丢失了一个自由度（由三次 旋转变成了两次旋转）。这被称为奇异性问题，在其他形式的欧拉角中也同样存在。</p>
+<p><img src="/images/slam-notes/9.png"></p>
+<p>俯仰角在±90°时欧拉角出现万向锁的过程：</p>
+<p>​    假设旋转顺序是 xyz，    </p>
+<p>​    第一次绕x轴旋转，得到 xy’z’</p>
+<p>​    第二次绕y’轴旋转90度，得到 x’y’z’’</p>
+<p>​    由于y’旋转了90度，导致z’’与 x同轴了，这样在z’’上的旋转等价于最初在x上的旋转。</p>
+<p>​    相当于这一次的 xyz操作，可以简化为 xy. 我们将这个现象称为 万向锁。</p>
+</li>
+<li><p>旋转向量：使用方向与旋转轴n一致，长度等于旋转角的向量θ称为旋转向量，相比旋转矩阵更加紧凑，维数为6维。旋转矩阵和旋转向量之间的公式叫罗德里格斯，转换公式如下：<br><img src="/images/slam-notes/10.png"></p>
+<blockquote>
+<p> 符号 ∧ 是向量到反对称的转换符</p>
+</blockquote>
+</li>
+<li><p>四元数q:用复数的乘法表示旋转，紧凑的，没有奇异性。性质：一个模长为1的复数，可表示复平面的纯旋转；任意的旋转都可以用互为相反数的四元数表示；满足一定的运算。<br>  公式表达如下：<br>  <img src="/images/slam-notes/11.png"></p>
+<p>其中 i, j, k 为四元数的三个虚部。这三个虚部满足关系式：</p>
+<p><img src="/images/slam-notes/12.png"></p>
+</li>
+<li><p>用四元数表示旋转：</p>
+<p><img src="/images/slam-notes/a.png"></p>
+</li>
+<li><p>各种描述之间的转换</p>
+<p><img src="/images/slam-notes/b.png"></p>
+</li>
+</ol>
+<h2 id="第四讲-李群与李代数"><a href="#第四讲-李群与李代数" class="headerlink" title="第四讲    李群与李代数"></a>第四讲    <code>李群与李代数</code></h2><h3 id="一、李群"><a href="#一、李群" class="headerlink" title="一、李群"></a>一、李群</h3><p>群（Group）是一种集合加上一种运算的代数结构。我们把集合记作 A，运算记作 ·， 那么群可以记作 G = (A, ·)。群要求这个运算满足以下几个条件：</p>
+<p><img src="/images/slam-notes/15.png"></p>
+<p>矩阵中常见的群有：</p>
+<p>一般线性群 GL(n) 指 n × n 的可逆矩阵，它们对矩阵乘法成群。</p>
+<p>特殊正交群 SO(n) 也就是所谓的旋转矩阵群，其中 SO(2) 和 SO(3) 最为常见。</p>
+<p>特殊欧氏群 SE(n) 也就是前面提到的 n 维欧氏变换，如 SE(2) 和 SE(3)。</p>
+<p><strong>李群</strong>是指具有连续（光滑）性质的群。像整数群 Z 那样离散的群没有连续性质，所以不是李群。而 SO(n) 和 SE(n)，它们在实数空间上是连续的。我们能够直观地想象一个刚体能够连续地在空间中运动，所以它们都是李群。</p>
+<p><img src="/images/slam-notes/16.png"></p>
+<h3 id="二、李代数"><a href="#二、李代数" class="headerlink" title="二、李代数"></a>二、李代数</h3><p>每个李群都有与之对应的李代数。李代数描述了李群的局部性质。通用的李代数的定义如下：</p>
+<p>李代数由一个集合 V，一个数域 F 和一个二元运算 [, ] 组成。如果它们满足以下几条 性质，称 (V, F, [, ]) 为一个李代数，记作 g。</p>
+<p><img src="/images/slam-notes/17.png"></p>
+<p>其中二元运算被称为李括号。</p>
+<h4 id="2-1-李群SO-3-的李代数so-3"><a href="#2-1-李群SO-3-的李代数so-3" class="headerlink" title="2.1 李群SO(3)的李代数so(3)"></a>2.1 李群SO(3)的李代数so(3)</h4><p><img src="/images/slam-notes/c.png"></p>
+<h4 id="2-2-李群SE-3-的李代数se-3"><a href="#2-2-李群SE-3-的李代数se-3" class="headerlink" title="2.2 李群SE(3)的李代数se(3)"></a>2.2 李群SE(3)的李代数se(3)</h4><p><img src="/images/slam-notes/d.png"></p>
+<h3 id="三、指数与对数映射"><a href="#三、指数与对数映射" class="headerlink" title="三、指数与对数映射"></a>三、指数与对数映射</h3><p>指数映射反映了从李代数到李群的对应关系：<code>R=exp(ϕ^)</code></p>
+<p>由于 <code>ϕ</code> 是向量，定义其角度和模长：</p>
+<p>​    角度乘单位向量：<code>ϕ=θa</code></p>
+<p>​    关于 <code>a</code> ，可以验证以下性质：</p>
+<p><img src="/images/slam-notes/19.png">    </p>
+<p>​    <img src="/images/slam-notes/20.png"></p>
+<p>Taylor展开：</p>
+<p><img src="/images/slam-notes/21.png"></p>
+<p>结果：（对比之前的罗德里格斯公式）</p>
+<p><img src="/images/slam-notes/22.png"></p>
+<p><strong>SO(3)上的指数映射</strong></p>
+<p><img src="/images/slam-notes/23.png"></p>
+<p><strong>SE(3)上的指数映射</strong></p>
+<p><img src="/images/slam-notes/24.png"></p>
+<p><img src="/images/slam-notes/25.png"></p>
+<p><strong>SO(3), SE(3), so(3), se(3) 的对应关系</strong></p>
+<p><img src="/images/slam-notes/26.png"></p>
+<h2 id="第五讲-相机与图像"><a href="#第五讲-相机与图像" class="headerlink" title="第五讲    相机与图像"></a>第五讲    <code>相机与图像</code></h2><h3 id="一、相机"><a href="#一、相机" class="headerlink" title="一、相机"></a>一、相机</h3><p>相机主要分为单目（Monocular）、双目(Stereo)、深度相机(RGB-D)三类。</p>
+<ol>
+<li>单目相机：是三维空间的二维投影，可以用来估计相机运动和结构（场景的大小和远近）。<br>原理是近处的物体移动的快、远处的物体移动慢，相机运动可以形成视差。<br>优点：成本低；<br>缺点：尺度不确定性，无法估计物体的真实尺度。例如相机的运动和场景同时放大两倍，单目所看到的像是一样的。</li>
+<li>双目相机：基线（两个相机间的距离）来估计每个像素的空间位置。基线越大，测量的物体越远。<br>优点：解决了尺度不确定性。<br>缺点：深度量程和精度受双目的基线和分辨率限制；视差的计算消耗计算资源。</li>
+<li>深度相机：通过红外结构光或Time-of-Fligfeixianxingyouhuaht(ToF)原理，用物理方法测量物体的距离。<br>优点：相比双目节省计算量。<br>缺点：测量范围窄、噪声大、视野小、易受日光干扰、无法测量透射材料等</li>
+</ol>
+<h3 id="二、坐标系"><a href="#二、坐标系" class="headerlink" title="二、坐标系"></a>二、坐标系</h3><ul>
+<li><p>世界坐标</p>
+<ul>
+<li>也就是真实世界的立体空间坐标，是一个三维坐标系</li>
+<li><em>Ow-XwYwZw</em>：世界坐标系,描述相机位置,单位m</li>
+</ul>
+</li>
+<li><p>相机坐标</p>
+<ul>
+<li>根据透镜成像原理，将世界坐标在照相机内呈现，是一个三维坐标系</li>
+<li><em>Oc-XcYcZc</em>：相机坐标系,光心为原点,单位m</li>
+</ul>
+</li>
+<li><p>图像坐标</p>
+<ul>
+<li><p>将相机呈现的三维坐标投影到屏幕上，而建立的新坐标系，不含距离信息，是一个二维坐标系</p>
+</li>
+<li><p><em>o-xy</em> ：图像坐标系,原点为成像平面中点,单位mm一、相机<br>相机主要分为单目（Monocular）、双目(Stereo)、深度相机(RGB-D)三类。</p>
+<p>单目相机：是三维空间的二维投影，可以用来估计相机运动和结构（场景的大小和远近）。<br>原理是近处的物体移动的快、远处的物体移动慢，相机运动可以形成视差。<br>优点：成本低；<br>缺点：尺度不确定性，无法估计物体的真实尺度。例如相机的运动和场景同时放大两倍，单目所看到的像是一样的。</p>
+<p>双目相机：基线（两个相机间的距离）来估计每个像素的空间位置。基线越大，测量的物体越远。<br>优点：解决了尺度不确定性。<br>缺点：深度量程和精度受双目的基线和分辨率限制；视差的计算消耗计算资源。</p>
+<p>深度相机：通过红外结构光或Time-of-Fligfeixianxingyouhuaht(ToF)原理，用物理方法测量物体的距离。<br>优点：相比双目节省计算量。<br>缺点：测量范围窄、噪声大、视野小、易受日光干扰、无法测量透射材料等</p>
+</li>
+</ul>
+</li>
+<li><p>像素坐标</p>
+<ul>
+<li>将投影的图像坐标离散抽样形成的做种图片，是一个二维的坐标系</li>
+<li><em>uv</em> ：像素坐标系,原点为图像左上角,单位pixel</li>
+</ul>
+<p><img src="/images/slam-notes/27.png"></p>
+</li>
+</ul>
+<h3 id="三、针孔相机模型"><a href="#三、针孔相机模型" class="headerlink" title="三、针孔相机模型"></a>三、针孔相机模型</h3><p><img src="/images/slam-notes/28.png"></p>
+<p><strong>针孔相机模型的矩阵形式：</strong></p>
+<p>中间的矩阵是相机的内参，记为K。</p>
+<p><img src="/images/slam-notes/29.png"></p>
+<p>除内参外，相机坐标系P与世界坐标系Pw还相差一个变换：</p>
+<p><img src="/images/slam-notes/30.png"></p>
+<p>这里 R, t 或 T 称为外参，是SLAM估计的目标。</p>
+<h3 id="四、畸变"><a href="#四、畸变" class="headerlink" title="四、畸变"></a>四、畸变</h3><p>相机的前方通常会有一个透镜，会对成像产生影响，称为畸变。</p>
+<p>由透镜形状引起的畸变称为径向畸变，包括桶形畸变和枕形畸变。桶形畸变是由于图像放大率随着与光轴之间的距离增加而减小；枕形畸变相反。</p>
+<p><img src="/images/slam-notes/31.png"></p>
+<p>径向畸变的程度会随着与中心距离的增加而增加，可以通过公式(5.11)进行矫正。 </p>
+<p><img src="/images/slam-notes/32.png"></p>
+<p>透镜在装机过程中不和成像平面严格平行会引入切向畸变。</p>
+<p><img src="/images/slam-notes/33.png"></p>
+<p>切向畸变通过公式(5.12)矫正。</p>
+<p><img src="/images/slam-notes/34.png"></p>
+<p>对于畸变的矫正在实际当中可灵活保留各项系数。通常在视觉SLAM中，考虑先对整张图片进行去畸变，得到去畸变后的图像，然后讨论图像中的点的位置。</p>
+<h2 id="第六讲-非线性优化"><a href="#第六讲-非线性优化" class="headerlink" title="第六讲    非线性优化"></a>第六讲    <code>非线性优化</code></h2><p>待更新~</p>
+]]></content>
       <categories>
-          
-          <category> 计算机视觉 </category>
-          
+        <category>视觉SLAM</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> OpenCV </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-  
-  
+      <tags>
+        <tag>slam</tag>
+      </tags>
+  </entry>
 </search>
