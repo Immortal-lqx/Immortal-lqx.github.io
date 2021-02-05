@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="SLAM问题的数学表述与推证, 所念皆星河">
+    <meta name="keywords" content="SLAM问题的数学表述, 所念皆星河">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -16,7 +16,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>SLAM问题的数学表述与推证 | 所念皆星河</title>
+    <title>SLAM问题的数学表述 | 所念皆星河</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -291,12 +291,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/20.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/13.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">SLAM问题的数学表述与推证</h1>
+                    <h1 class="description center-align post-title">SLAM问题的数学表述</h1>
                 </div>
             </div>
         </div>
@@ -483,7 +483,7 @@
 <p>之后，我们将以视觉SLAM为例来更深入的理解SLAM的数学表述。</p>
 <h2 id="针孔相机模型"><a href="#针孔相机模型" class="headerlink" title="针孔相机模型"></a>针孔相机模型</h2><p>考虑到视觉SLAM的传感器是相机，并且通常符合针孔相机模型。所以在继续探讨之前，我们将对针孔相机模型做一个简单的介绍。</p>
 <h3 id="从相机坐标系到图像坐标系"><a href="#从相机坐标系到图像坐标系" class="headerlink" title="从相机坐标系到图像坐标系"></a>从相机坐标系到图像坐标系</h3><p>如下图，相机坐标系下的一点$ P(X, Y, Z) $，通过小孔成像在相机的物理成像平面上，记为$ P’(X’, Y’) $。</p>
-<p><img src="/home/lqx/Blog/blog_page/source/images/slam-notes/28.png"></p>
+<p><img src="/images/slam-notes/28.png"></p>
 <p>我们能够很容易的得出以下结论：<br>$$<br>\frac Zf=- \frac X{X’}=- \frac Y{Y’}<br>$$<br>由于我们通常看到的像都是正的，并且为了公式的简洁，我们对上式加以整理，得到：<br>$$<br>X’=f \frac XZ \\<br>Y’=f \frac YZ<br>$$</p>
 <h3 id="从图像坐标系到像素坐标系"><a href="#从图像坐标系到像素坐标系" class="headerlink" title="从图像坐标系到像素坐标系"></a>从图像坐标系到像素坐标系</h3><p>事实上，计算机看到的图像都是由像素构成的，从图像坐标系到像素坐标系还需要经过一次转化。这里我们记像素坐标为$ P’’(u,v) $。<br>$$<br>\begin{cases}<br>u=\alpha X’+c_x \\<br>v=\beta Y’+c_y<br>\end{cases}<br>$$<br>其中$ \alpha $和$ \beta $分别表示x轴和y轴的缩放系数，而$ c_x $和$ c_y $则表示平移量。</p>
 <p>我们将之前得到的结论代入上式，可以得到：<br>$$<br>\begin{cases}<br>u=f_x\frac XZ+c_x \\<br>v=f_y\frac YZ+c_y<br>\end{cases}<br>$$<br>其矩阵形式可以表示为：<br>$$<br>\begin{pmatrix} u\\v\\1 \end{pmatrix}=\frac1Z\begin{pmatrix}f_x &amp; 0 &amp; c_x \\ 0 &amp; f_y &amp; c_y\\0 &amp; 0 &amp; 1 \end{pmatrix}<br>\begin{pmatrix}X\\Y\\Z\end{pmatrix}<br>\overset{\text{def}}{=}\frac 1ZKP<br>$$<br>但我们通常使用下面的公式来表示，它看上去更简洁：<br>$$<br>Z\begin{pmatrix} u\\v\\1 \end{pmatrix}=\begin{pmatrix}f_x &amp; 0 &amp; c_x \\ 0 &amp; f_y &amp; c_y\\0 &amp; 0 &amp; 1 \end{pmatrix}<br>\begin{pmatrix}X\\Y\\Z\end{pmatrix}<br>\overset{\text{def}}{=}KP<br>$$<br>左边的是齐次坐标，而右边的是非齐次坐标。我们把中间的矩阵称为内参数，记为K，内参通常在相机生产之后就已经固定，我们可以通过查询或者标定获得相机的内参。</p>
@@ -522,7 +522,7 @@
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://Immortal-lqx.github.io/2021/02/05/slam-wen-ti-de-shu-xue-biao-shu-yu-tui-zheng/">http://Immortal-lqx.github.io/2021/02/05/slam-wen-ti-de-shu-xue-biao-shu-yu-tui-zheng/</a>
+                    <a href="http://Immortal-lqx.github.io/2021/02/05/slam-wen-ti-de-shu-xue-biao-shu/">http://Immortal-lqx.github.io/2021/02/05/slam-wen-ti-de-shu-xue-biao-shu/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -1004,13 +1004,13 @@
                 <i class="far fa-dot-circle"></i>&nbsp;本篇
             </div>
             <div class="card">
-                <a href="/2021/02/05/slam-wen-ti-de-shu-xue-biao-shu-yu-tui-zheng/">
+                <a href="/2021/02/05/slam-wen-ti-de-shu-xue-biao-shu/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/20.jpg" class="responsive-img" alt="SLAM问题的数学表述与推证">
+                        <img src="/medias/featureimages/13.jpg" class="responsive-img" alt="SLAM问题的数学表述">
                         
-                        <span class="card-title">SLAM问题的数学表述与推证</span>
+                        <span class="card-title">SLAM问题的数学表述</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
