@@ -117,6 +117,129 @@ if(detection_failed)
       </tags>
   </entry>
   <entry>
+    <title>ROS中使用ddynamicReconfigure</title>
+    <url>/2020/09/05/ros-zhong-shi-yong-ddynamicreconfigure/</url>
+    <content><![CDATA[<h1 id="ROS中使用ddynamicReconfigure"><a href="#ROS中使用ddynamicReconfigure" class="headerlink" title="ROS中使用ddynamicReconfigure"></a>ROS中使用ddynamicReconfigure</h1><h2 id="关于ddynamicReconfigure类"><a href="#关于ddynamicReconfigure类" class="headerlink" title="关于ddynamicReconfigure类"></a>关于ddynamicReconfigure类</h2><p>The DDynamicReconfigure class allows to use ROS dynamic reconfigure without the need to write a custom cpf file, <strong>variables are registered and exposed at run time</strong>.  Modification of the variables is done through a variable pointer or through a callback function.</p>
+<p>The <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> class is the main class responsible for keeping track of parameters basic properties, values, descriptions, etc. </p>
+<p>It is also responsible of handling callbacks, config change requests, description setup and config setup, and the ROS publishers and  services.</p>
+<p>To operate a DDynamic instance, you must go through the following procedure:</p>
+<ol>
+<li>Construct a <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> instance with proper handling.</li>
+<li>Add parameters to the instance as needed with any of the “add” methods.</li>
+<li>Start the ROS services with any of the “start” methods.</li>
+<li>If you need to change the callback after startup you may do so using “setCallback”.</li>
+<li>When you need to get any of the stored parameters, call either “get” or “at” on this instance, rather than through the callback. </li>
+</ol>
+<h2 id="常用函数原型-amp-解析"><a href="#常用函数原型-amp-解析" class="headerlink" title="常用函数原型&amp;解析"></a>常用函数原型&amp;解析</h2><p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p>
+<p>When a change is made, <strong>it will be reflected in the variable directly.</strong></p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;
+  void registerVariable(
+  const std::string &amp;name, 
+  T *variable,
+  const std::string &amp;description = "", 
+  T min = getMin&lt;T&gt;(), 
+  T max = getMax&lt;T&gt;()
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;
+  void registerEnumVariable(
+  const std::string &amp;name, 
+  T *variable,
+  const std::string &amp;description = "",
+  std::map&lt;std::string, T&gt; enum_dict = {},
+  const std::string &amp;enum_description = ""
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<hr>
+<p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p>
+<p>When a change is made, <strong>the callback will be called with the new value.</strong></p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
+  void registerVariable(
+  const std::string &amp;name, 
+  T current_value,
+  const boost::function&lt;void(T value)&gt; &amp;callback,
+  const std::string &amp;description = "", 
+  T min = getMin&lt;T&gt;(), 
+  T max = getMax&lt;T&gt;()
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
+  void registerEnumVariable(
+  const std::string &amp;name, 
+  T current_value,
+  const boost::function&lt;void(T)&gt; &amp;callback,
+  const std::string &amp;description,
+  std::map&lt;std::string, T&gt; enum_dict = {},
+  const std::string &amp;enum_description = ""
+  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<hr>
+<p>publishServicesTopics <strong>starts the server</strong> once all the needed variables are registered.</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">void publishServicesTopics();<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>关于getMin()与getMax()</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
+inline T getMin()
+{
+  return std::numeric_limits&lt;T&gt;::min();
+}
+
+template &lt;&gt;
+inline bool getMin()
+{
+  return false;
+}
+
+template &lt;&gt;
+inline std::string getMin&lt;std::string&gt;()
+{
+  return "";
+}
+
+template &lt;typename T&gt;
+inline T getMax()
+{
+  return std::numeric_limits&lt;T&gt;::min();
+}
+
+template &lt;&gt;
+inline bool getMax()
+{
+  return true;
+}
+
+template &lt;&gt;
+inline std::string getMax()
+{
+  return "";
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="简单示例"><a href="#简单示例" class="headerlink" title="简单示例"></a>简单示例</h2><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;ros/ros.h&gt;
+#include &lt;ddynamic_reconfigure/ddynamic_reconfigure.h&gt;
+
+int global_int;
+
+void paramCb(int new_value)
+{
+   global_int = new_value;
+   ROS_INFO("Param modified: %d", global_int);
+}
+
+int main(int argc, char **argv) {
+    // ROS init stage
+    ros::init(argc, argv, "ddynamic_tutorials");
+    ros::NodeHandle nh;
+    ddynamic_reconfigure::DDynamicReconfigure ddr;
+    
+    ddr.registerVariable&lt;int&gt;("int_param",124, boost::bind(paramCb, _1), "param description",-1000,2357);
+    ddr.publishServicesTopics();
+    // Now parameter can be modified from the dynamic_reconfigure GUI or other tools and the callback is called on each update
+    ros::spin();
+    return 0;
+ }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+]]></content>
+      <categories>
+        <category>ROS基础操作</category>
+      </categories>
+      <tags>
+        <tag>ROS</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>ROS中nodelet的使用</title>
     <url>/2020/09/04/ros-zhong-nodelet-de-shi-yong/</url>
     <content><![CDATA[<h1 id="ROS中nodelet的使用："><a href="#ROS中nodelet的使用：" class="headerlink" title="ROS中nodelet的使用："></a>ROS中nodelet的使用：</h1><h2 id="1-为什么使用nodelet？"><a href="#1-为什么使用nodelet？" class="headerlink" title="1. 为什么使用nodelet？"></a>1. 为什么使用nodelet？</h2><p>Nodelet提供了一种方法，可以在同一台计算机上，在同一个进程内，运行多个算法，且在进程内消息传递时不产生复制成本（zero  copy）。在一个node里面，roscpp利用指针传递可以实现在publish和subscribe调用时的零拷贝。为了实现相似的效果，多个nodelets允许将多个类动态加载到同一个node里，同时还提供独立的命名空间，从而使得这些nodelets尽管运行在同一个进程里，但却仍然像单独的node一样工作。也就实现了“在一个进程（node）里运行多个nodelet”的效果。</p>
@@ -265,129 +388,6 @@ rosrun nodelet nodelet load try_nodelet/try_use nodelet_manager __name:<span cla
 <p>注意，如果这里报错“According to the loaded plugin descriptions the class try_nodelet/try_use with base class type nodelet::Nodelet does not exist.”  一般是因为运行manager的窗口（终端2）没有source</p>
 <p>所以要么一开始就把source写进配置文件中，要么就每个相关的窗口都要source，这样能够避免很多问题，也方便自己找到程序的bug所在。</p>
 <h2 id="4-将已有的ROS工程改写为nodelet"><a href="#4-将已有的ROS工程改写为nodelet" class="headerlink" title="4.将已有的ROS工程改写为nodelet"></a>4.将已有的ROS工程改写为nodelet</h2><p>待补充~</p>
-]]></content>
-      <categories>
-        <category>ROS基础操作</category>
-      </categories>
-      <tags>
-        <tag>ROS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>ROS中使用ddynamicReconfigure</title>
-    <url>/2020/09/05/ros-zhong-shi-yong-ddynamicreconfigure/</url>
-    <content><![CDATA[<h1 id="ROS中使用ddynamicReconfigure"><a href="#ROS中使用ddynamicReconfigure" class="headerlink" title="ROS中使用ddynamicReconfigure"></a>ROS中使用ddynamicReconfigure</h1><h2 id="关于ddynamicReconfigure类"><a href="#关于ddynamicReconfigure类" class="headerlink" title="关于ddynamicReconfigure类"></a>关于ddynamicReconfigure类</h2><p>The DDynamicReconfigure class allows to use ROS dynamic reconfigure without the need to write a custom cpf file, <strong>variables are registered and exposed at run time</strong>.  Modification of the variables is done through a variable pointer or through a callback function.</p>
-<p>The <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> class is the main class responsible for keeping track of parameters basic properties, values, descriptions, etc. </p>
-<p>It is also responsible of handling callbacks, config change requests, description setup and config setup, and the ROS publishers and  services.</p>
-<p>To operate a DDynamic instance, you must go through the following procedure:</p>
-<ol>
-<li>Construct a <a href="http://docs.ros.org/kinetic/api/ddynamic_reconfigure/html/classddynamic__reconfigure_1_1DDynamicReconfigure.html">DDynamicReconfigure</a> instance with proper handling.</li>
-<li>Add parameters to the instance as needed with any of the “add” methods.</li>
-<li>Start the ROS services with any of the “start” methods.</li>
-<li>If you need to change the callback after startup you may do so using “setCallback”.</li>
-<li>When you need to get any of the stored parameters, call either “get” or “at” on this instance, rather than through the callback. </li>
-</ol>
-<h2 id="常用函数原型-amp-解析"><a href="#常用函数原型-amp-解析" class="headerlink" title="常用函数原型&amp;解析"></a>常用函数原型&amp;解析</h2><p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p>
-<p>When a change is made, <strong>it will be reflected in the variable directly.</strong></p>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;
-  void registerVariable(
-  const std::string &amp;name, 
-  T *variable,
-  const std::string &amp;description = "", 
-  T min = getMin&lt;T&gt;(), 
-  T max = getMax&lt;T&gt;()
-  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template&lt;typename T&gt;
-  void registerEnumVariable(
-  const std::string &amp;name, 
-  T *variable,
-  const std::string &amp;description = "",
-  std::map&lt;std::string, T&gt; enum_dict = {},
-  const std::string &amp;enum_description = ""
-  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<hr>
-<p>registerVariable register a variable to be modified via the dynamic_reconfigure API. </p>
-<p>When a change is made, <strong>the callback will be called with the new value.</strong></p>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
-  void registerVariable(
-  const std::string &amp;name, 
-  T current_value,
-  const boost::function&lt;void(T value)&gt; &amp;callback,
-  const std::string &amp;description = "", 
-  T min = getMin&lt;T&gt;(), 
-  T max = getMax&lt;T&gt;()
-  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
-  void registerEnumVariable(
-  const std::string &amp;name, 
-  T current_value,
-  const boost::function&lt;void(T)&gt; &amp;callback,
-  const std::string &amp;description,
-  std::map&lt;std::string, T&gt; enum_dict = {},
-  const std::string &amp;enum_description = ""
-  );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<hr>
-<p>publishServicesTopics <strong>starts the server</strong> once all the needed variables are registered.</p>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">void publishServicesTopics();<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>关于getMin()与getMax()</p>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
-inline T getMin()
-{
-  return std::numeric_limits&lt;T&gt;::min();
-}
-
-template &lt;&gt;
-inline bool getMin()
-{
-  return false;
-}
-
-template &lt;&gt;
-inline std::string getMin&lt;std::string&gt;()
-{
-  return "";
-}
-
-template &lt;typename T&gt;
-inline T getMax()
-{
-  return std::numeric_limits&lt;T&gt;::min();
-}
-
-template &lt;&gt;
-inline bool getMax()
-{
-  return true;
-}
-
-template &lt;&gt;
-inline std::string getMax()
-{
-  return "";
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="简单示例"><a href="#简单示例" class="headerlink" title="简单示例"></a>简单示例</h2><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;ros/ros.h&gt;
-#include &lt;ddynamic_reconfigure/ddynamic_reconfigure.h&gt;
-
-int global_int;
-
-void paramCb(int new_value)
-{
-   global_int = new_value;
-   ROS_INFO("Param modified: %d", global_int);
-}
-
-int main(int argc, char **argv) {
-    // ROS init stage
-    ros::init(argc, argv, "ddynamic_tutorials");
-    ros::NodeHandle nh;
-    ddynamic_reconfigure::DDynamicReconfigure ddr;
-    
-    ddr.registerVariable&lt;int&gt;("int_param",124, boost::bind(paramCb, _1), "param description",-1000,2357);
-    ddr.publishServicesTopics();
-    // Now parameter can be modified from the dynamic_reconfigure GUI or other tools and the callback is called on each update
-    ros::spin();
-    return 0;
- }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 ]]></content>
       <categories>
         <category>ROS基础操作</category>
@@ -836,6 +836,81 @@ int main(int argc,char** argv)
       <tags>
         <tag>OpenCV</tag>
         <tag>ROS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>我的留学计划</title>
+    <url>/2021/02/25/wo-de-liu-xue-ji-hua/</url>
+    <content><![CDATA[<h2 id="我的留学计划"><a href="#我的留学计划" class="headerlink" title="我的留学计划"></a>我的留学计划</h2><blockquote>
+<p>无奈生了一颗爱闯荡的心，对外面的世界念念不忘。</p>
+</blockquote>
+<h2 id="留学目的"><a href="#留学目的" class="headerlink" title="留学目的"></a>留学目的</h2><p>我觉得，我留学的目的是积极的。我不是因为厌倦了当前的生活，想逃避保研或者考研而选择出国留学；我也清楚海的那边，一样很残酷，在一个对自己的血统没有歧视的国度里，在一个竞争并不算激烈、甚至生活上还称得上有保障的社会中，在一个对自己来说没有任何语言、文化障碍的环境下，自己都算不上一个成功者的话，我有什么资本可以奢望在出国后，自己能够摇身一变，以胜者的姿态生存下来？我又有什么理由不继续失败？我怎么就那么自信地说因为我在国内做不好，所以我出国就能做好？成功的人在不同的地方有不同的成功方式，但是失败的人在不同的地方会有完全相同的失败方法。</p>
+<p>目前的我，对未来最美好的憧憬就是：能够在高水平的高校里任职，无论是国内还是国外。同时，我也对机器人技术充满好奇与期待，对计算机视觉充满热情，真心的想从事这方面的学术研究工作。</p>
+<p>所以，我出国留学，一个是想学习更多的知识，获得更广阔的视野；另一个是在国外更高更好的平台上，尽可能的做出成果，为以后进入高校任职做准备。</p>
+<h2 id="目前情况"><a href="#目前情况" class="headerlink" title="目前情况"></a>目前情况</h2><p>西北工业大学软件学院19级本科生</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GPA</td>
+<td>3.71，比较低，没有优势</td>
+</tr>
+<tr>
+<td>RANK</td>
+<td>专业10%左右，没有优势</td>
+</tr>
+<tr>
+<td>研究方向</td>
+<td>CV（主要是SLAM）</td>
+</tr>
+<tr>
+<td>研究经历</td>
+<td>足球基地人基地V5++团队成员；中国机器人大赛无人机挑战赛无人机快递项目亚军</td>
+</tr>
+<tr>
+<td>目标高校</td>
+<td>卡耐基梅隆大学机器人学院、香港科技大学空中机器人实验室、苏黎世联邦理工大学计算机视觉与几何实验室、慕尼黑工业大学计算机视觉组、香港中文大学天石机器人实验室</td>
+</tr>
+</tbody></table>
+<h2 id="未来规划"><a href="#未来规划" class="headerlink" title="未来规划"></a>未来规划</h2><blockquote>
+<p>需要不间断的调整和完善！</p>
+</blockquote>
+<h3 id="大二下学期"><a href="#大二下学期" class="headerlink" title="大二下学期"></a>大二下学期</h3><ul>
+<li><p>尽快的寻找本科生导师，目前比较想找下面这位导师。</p>
+<p>主要是想依靠导师来指导本科阶段的学习，尽早的为以后的研究生阶段做准备，并且争取做好校研、论文发表，快速提升自己的能力并找到比较好的暑研。</p>
+<p><img src="/images/MyPlan/npubsh.png"></p>
+</li>
+<li><p>刷高GPA，要求3.80以上</p>
+</li>
+<li><p>学习英语，备考六级，最低要求580+</p>
+</li>
+<li><p>真正的确定自己未来的研究方向、申请的专业方向</p>
+</li>
+<li><p>待定</p>
+</li>
+</ul>
+<h3 id="大二暑假"><a href="#大二暑假" class="headerlink" title="大二暑假"></a>大二暑假</h3><ul>
+<li>科研、暑研</li>
+<li>准备GRE和托福</li>
+<li>学习和提升自己的专业水平和英语水平，提前适应国外的教学模式</li>
+<li>待定</li>
+</ul>
+<h3 id="大三上学期"><a href="#大三上学期" class="headerlink" title="大三上学期"></a>大三上学期</h3><p>待定</p>
+<h3 id="大三下学期"><a href="#大三下学期" class="headerlink" title="大三下学期"></a>大三下学期</h3><p>待定</p>
+<h3 id="大三暑假"><a href="#大三暑假" class="headerlink" title="大三暑假"></a>大三暑假</h3><p>待定</p>
+<h3 id="大四上学期"><a href="#大四上学期" class="headerlink" title="大四上学期"></a>大四上学期</h3><p>待定</p>
+<h3 id="大四下学期"><a href="#大四下学期" class="headerlink" title="大四下学期"></a>大四下学期</h3><p>待定</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><img src="/images/MyPlan/timeline.jpg"></p>
+]]></content>
+      <categories>
+        <category>经验&amp;方法</category>
+      </categories>
+      <tags>
+        <tag>出国留学</tag>
       </tags>
   </entry>
   <entry>
