@@ -30,6 +30,46 @@
       </tags>
   </entry>
   <entry>
+    <title>OpenCV-Notes</title>
+    <url>/2021/02/24/opencv-notes/</url>
+    <content><![CDATA[<h1 id="OpenCV-Notes"><a href="#OpenCV-Notes" class="headerlink" title="OpenCV-Notes"></a>OpenCV-Notes</h1><h2 id="计算某一个算法的帧率"><a href="#计算某一个算法的帧率" class="headerlink" title="计算某一个算法的帧率"></a>计算某一个算法的帧率</h2><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">// Start timer
+double timer = (double) getTickCount();
+
+//待测算法
+algorithm();
+
+// Calculate Frames per second (FPS)
+float fps = getTickFrequency() / ((double) getTickCount() - timer);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="使用putText-函数将信息直接输出到图片上"><a href="#使用putText-函数将信息直接输出到图片上" class="headerlink" title="使用putText()函数将信息直接输出到图片上"></a>使用putText()函数将信息直接输出到图片上</h2><h3 id="函数原型"><a href="#函数原型" class="headerlink" title="函数原型"></a>函数原型</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">void cv::putText(
+	cv::Mat&amp; img, // 待绘制的图像
+	const string&amp; text, // 待绘制的文字
+	cv::Point origin, // 文本框的左下角
+	int fontFace, // 字体 (如cv::FONT_HERSHEY_PLAIN)
+	double fontScale, // 尺寸因子，值越大文字越大
+	cv::Scalar color, // 线条的颜色（RGB）
+	int thickness = 1, // 线条宽度
+	int lineType = 8, // 线型（4邻域或8邻域，默认8邻域）
+	bool bottomLeftOrigin = false // true='origin at lower left'
+);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h3><p>在图片左上角显示使用的算法，帧率，是否检测到目标物</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">putText(frame, detectionType, Point(100, 20), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(50, 170, 50), 2);
+
+putText(frame, "FPS : " + to_string(int(fps)), Point(100, 50), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(50, 170, 50), 2);
+
+if(detection_failed)
+	putText(frame, " Detection failed", Point(100, 80), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(0, 0, 255), 2);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>下面是效果图：</p>
+<p><img src="/images/OpenCV-Notes/1.png"></p>
+<p><img src="/images/OpenCV-Notes/2.png"></p>
+]]></content>
+      <categories>
+        <category>计算机视觉</category>
+      </categories>
+      <tags>
+        <tag>OpenCV</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>几种常见的颜色空间</title>
     <url>/2020/08/17/colorspace/</url>
     <content><![CDATA[<h1 id="颜色空间"><a href="#颜色空间" class="headerlink" title="颜色空间"></a>颜色空间</h1><p><strong>在计算机视觉，尤其颜色识别相关的算法中，rgb,hsv,lab颜色空间混用更是常用的方法。</strong></p>
@@ -68,46 +108,6 @@
 <p>​    对于<a href="https://baike.baidu.com/item/RGB%E6%A8%A1%E5%BC%8F/7362104">RGB模式</a>和CMYK模式转换的问题，可以先用RGB模式进行编辑工作，再用CMYK模式进行打印工作，在打印前才进行转换，然后加入必要的<a href="https://baike.baidu.com/item/%E8%89%B2%E5%BD%A9%E6%A0%A1%E6%AD%A3/10786529">色彩校正</a>，<a href="https://baike.baidu.com/item/%E9%94%90%E5%8C%96/2189784">锐化</a>和修整。这样虽然使<a href="https://baike.baidu.com/item/Photoshop/133866">Photoshop</a>在CMYK模式下速度慢一些，但可节省大部分编辑时间。这种打印前的模式转换，并不是避免图像损失最佳的途径，最佳方法是将<a href="https://baike.baidu.com/item/Lab%E6%A8%A1%E5%BC%8F">Lab模式</a>和CMYK模式相结合使用，这样可以最大程度的减少图像失真。</p>
 <h3 id="优缺点-1"><a href="#优缺点-1" class="headerlink" title="优缺点"></a>优缺点</h3><p>   优点：可以满足打印的需求，解决RGB不能打印的问题</p>
 <p>   缺点：一定程度上存在色彩的缺失，运行速度慢</p>
-]]></content>
-      <categories>
-        <category>计算机视觉</category>
-      </categories>
-      <tags>
-        <tag>OpenCV</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>OpenCV-Notes</title>
-    <url>/2021/02/24/opencv-notes/</url>
-    <content><![CDATA[<h1 id="OpenCV-Notes"><a href="#OpenCV-Notes" class="headerlink" title="OpenCV-Notes"></a>OpenCV-Notes</h1><h2 id="计算某一个算法的帧率"><a href="#计算某一个算法的帧率" class="headerlink" title="计算某一个算法的帧率"></a>计算某一个算法的帧率</h2><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">// Start timer
-double timer = (double) getTickCount();
-
-//待测算法
-algorithm();
-
-// Calculate Frames per second (FPS)
-float fps = getTickFrequency() / ((double) getTickCount() - timer);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="使用putText-函数将信息直接输出到图片上"><a href="#使用putText-函数将信息直接输出到图片上" class="headerlink" title="使用putText()函数将信息直接输出到图片上"></a>使用putText()函数将信息直接输出到图片上</h2><h3 id="函数原型"><a href="#函数原型" class="headerlink" title="函数原型"></a>函数原型</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">void cv::putText(
-	cv::Mat&amp; img, // 待绘制的图像
-	const string&amp; text, // 待绘制的文字
-	cv::Point origin, // 文本框的左下角
-	int fontFace, // 字体 (如cv::FONT_HERSHEY_PLAIN)
-	double fontScale, // 尺寸因子，值越大文字越大
-	cv::Scalar color, // 线条的颜色（RGB）
-	int thickness = 1, // 线条宽度
-	int lineType = 8, // 线型（4邻域或8邻域，默认8邻域）
-	bool bottomLeftOrigin = false // true='origin at lower left'
-);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h3><p>在图片左上角显示使用的算法，帧率，是否检测到目标物</p>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">putText(frame, detectionType, Point(100, 20), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(50, 170, 50), 2);
-
-putText(frame, "FPS : " + to_string(int(fps)), Point(100, 50), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(50, 170, 50), 2);
-
-if(detection_failed)
-	putText(frame, " Detection failed", Point(100, 80), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(0, 0, 255), 2);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>下面是效果图：</p>
-<p><img src="/images/OpenCV-Notes/1.png"></p>
-<p><img src="/images/OpenCV-Notes/2.png"></p>
 ]]></content>
       <categories>
         <category>计算机视觉</category>
@@ -274,37 +274,6 @@ rosrun nodelet nodelet load try_nodelet/try_use nodelet_manager __name:<span cla
       </tags>
   </entry>
   <entry>
-    <title>SLAM问题的数学表述</title>
-    <url>/2021/02/05/slam-wen-ti-de-shu-xue-biao-shu/</url>
-    <content><![CDATA[<h1 id="SLAM问题的数学表述"><a href="#SLAM问题的数学表述" class="headerlink" title="SLAM问题的数学表述"></a>SLAM问题的数学表述</h1><blockquote>
-<p>本文是作者对于SLAM问题数学表述的一些理解，如有错误，非常非常非常欢迎指正！</p>
-</blockquote>
-<h2 id="经典SLAM模型"><a href="#经典SLAM模型" class="headerlink" title="经典SLAM模型"></a>经典SLAM模型</h2><p>经典SLAM模型由一个<strong>运动方程</strong>和一个<strong>观测方程</strong>构成，如下所示：<br>$$<br>\begin{cases}<br>x_k &amp;= \ f(x_{k-1},u_k,w_k) \\<br>z_{k,j} &amp;= \ h(y_j,x_k,v_{k,j})<br>\end{cases}<br>$$<br>有时候也会写成下面这样的形式：<br>$$<br>\begin{cases}<br>x_k &amp;= \ f(x_{k-1},u_k) +w_k \\<br>z_{k,j} &amp;= \ h(y_j,x_k)+v_{k,j}<br>\end{cases}<br>$$<br>这两种形式本质上都是一样的。其中，$ x_k $表示第k次的位置或者位姿，$ u_k $表示第k次传感器的读数或者输入，$ w_k $表示第k次运动过程中的噪声；而$ y_j $为观测到的路标点j，$ z_{k,j} $则表示第k次观测中对于路标点j所得到的观测结果，$ v_{k,j} $为本次观测过程中的噪声。而上面的函数 $ f $ 和 $ h $ ，需要根据具体的情况来确定。</p>
-<p>之后，我们将以视觉SLAM为例来更深入的理解SLAM的数学表述。</p>
-<h2 id="针孔相机模型"><a href="#针孔相机模型" class="headerlink" title="针孔相机模型"></a>针孔相机模型</h2><p>考虑到视觉SLAM的传感器是相机，并且通常符合针孔相机模型。所以在继续探讨之前，我们将对针孔相机模型做一个简单的介绍。</p>
-<h3 id="从相机坐标系到图像坐标系"><a href="#从相机坐标系到图像坐标系" class="headerlink" title="从相机坐标系到图像坐标系"></a>从相机坐标系到图像坐标系</h3><p>如下图，相机坐标系下的一点$ P(X, Y, Z) $，通过小孔成像在相机的物理成像平面上，记为$ P’(X’, Y’) $。</p>
-<p><img src="/images/slam-notes/28.png"></p>
-<p>我们能够很容易的得出以下结论：<br>$$<br>\frac Zf=- \frac X{X’}=- \frac Y{Y’}<br>$$<br>由于我们通常看到的像都是正的，并且为了公式的简洁，我们对上式加以整理，得到：<br>$$<br>X’=f \frac XZ \\<br>Y’=f \frac YZ<br>$$</p>
-<h3 id="从图像坐标系到像素坐标系"><a href="#从图像坐标系到像素坐标系" class="headerlink" title="从图像坐标系到像素坐标系"></a>从图像坐标系到像素坐标系</h3><p>事实上，计算机看到的图像都是由像素构成的，从图像坐标系到像素坐标系还需要经过一次转化。这里我们记像素坐标为$ P’’(u,v) $。<br>$$<br>\begin{cases}<br>u=\alpha X’+c_x \\<br>v=\beta Y’+c_y<br>\end{cases}<br>$$<br>其中$ \alpha $和$ \beta $分别表示x轴和y轴的缩放系数，而$ c_x $和$ c_y $则表示平移量。</p>
-<p>我们将之前得到的结论代入上式，可以得到：<br>$$<br>\begin{cases}<br>u=f_x\frac XZ+c_x \\<br>v=f_y\frac YZ+c_y<br>\end{cases}<br>$$<br>其矩阵形式可以表示为：<br>$$<br>\begin{pmatrix} u\\v\\1 \end{pmatrix}=\frac1Z\begin{pmatrix}f_x &amp; 0 &amp; c_x \\ 0 &amp; f_y &amp; c_y\\0 &amp; 0 &amp; 1 \end{pmatrix}<br>\begin{pmatrix}X\\Y\\Z\end{pmatrix}<br>\overset{\text{def}}{=}\frac 1ZKP<br>$$<br>但我们通常使用下面的公式来表示，它看上去更简洁：<br>$$<br>Z\begin{pmatrix} u\\v\\1 \end{pmatrix}=\begin{pmatrix}f_x &amp; 0 &amp; c_x \\ 0 &amp; f_y &amp; c_y\\0 &amp; 0 &amp; 1 \end{pmatrix}<br>\begin{pmatrix}X\\Y\\Z\end{pmatrix}<br>\overset{\text{def}}{=}KP<br>$$<br>左边的是齐次坐标，而右边的是非齐次坐标。我们把中间的矩阵称为内参数，记为K，内参通常在相机生产之后就已经固定，我们可以通过查询或者标定获得相机的内参。</p>
-<h3 id="从世界坐标系到相机坐标系"><a href="#从世界坐标系到相机坐标系" class="headerlink" title="从世界坐标系到相机坐标系"></a>从世界坐标系到相机坐标系</h3><p>上面我们仅仅描述了物体从相机坐标系到像素坐标系的转化。而在SLAM中，我们通常需要设置一个世界坐标系以描述相机或机器人的位置信息。因此从物体被观测，再到获得观测结果，即物体的像素坐标，中间还有一个转化过程。我们使用如下的一个式子进行描述：<br>$$<br>ZP_{uv}=Z\begin{pmatrix} u\\v\\1 \end{pmatrix}=KP=K(RP_w+t)=KTP_w<br>$$<br>这里，$ R $是旋转矩阵，$ t $是平移矩阵，$ T= \begin{pmatrix} R &amp; t \\ 0 &amp; 1 \end{pmatrix} $。可以理解为使用世界坐标系描述的点$ P_w $经过旋转变化和平移变化，得到了使用相机坐标系描述的点$ P $。</p>
-<p><strong>其中R，t 或T被称为外参，而外参正是SLAM估计的目标。</strong></p>
-<h2 id="更具体的数学表述"><a href="#更具体的数学表述" class="headerlink" title="更具体的数学表述"></a>更具体的数学表述</h2><p>再回到最开始提到的运动方程和观测方程：<br>$$<br>\begin{cases}<br>x_k &amp;= \ f(x_{k-1},u_k) +w_k \\<br>z_{k,j} &amp;= \ h(y_j,x_k)+v_{k,j}<br>\end{cases}<br>$$</p>
-<p>我们知道机器人有六个自由度，因此我们可以把$ x_k $理解为第k次观测时机器人的位姿，它是六维的，我们可以用向量表示，也可以使用变换矩阵表示，即上面的$ T $（可以认为当前机器人的位姿是由机器人在原点经过$ R $旋转和$ t $平移得到的）。此时运动方程描述的是机器人在第k-1次观测后，对其传感器输入$ u_k $，使机器人的位姿从$ x_{k-1} $变换到了$ x_k $，而$ w_k $则是此次运动中的噪声。</p>
-<p>而我们上面讲的针孔相机模型，实际上就是视觉SLAM中的观测模型。公式中$ y_j $就是针孔相机模型中我们观测的点$ P_w $，表示世界坐标系下路标点j的坐标，而$ z_{k,j} $就是观测的最终结果——像素坐标$ P_{uv} $。$ x_k $既是机器人的位姿，实际上也是模型中的外参$ T $。$ v_{k,j} $则是此次观测中的噪声。</p>
-<p>至此，我们可以用一种更具体的形式重写上面的运动方程和观测方程：<br>$$<br>\begin{cases}<br>T_k &amp;= \ f(T_{k-1},u_k) +w_k \\<br>s_j P_{uv(k,j)} &amp;= \ K(R_kP_{w(j)}+t_k)+v_{k,j}=KT_kP_{w(j)}+v_{k,j}<br>\end{cases}<br>$$<br>其中$ s_j $是路标点j到相机光心的距离。</p>
-<h2 id="对SLAM问题的总结"><a href="#对SLAM问题的总结" class="headerlink" title="对SLAM问题的总结"></a>对SLAM问题的总结</h2><p>通常，由于各种复杂因素的影响，我们无法直接求解机器人实际的运动方程，也无法通过理论上的运动方程精确计算出机器人的位姿，因此我们通过求解观测方程来相对精确地计算机器人的位置信息。</p>
-<p>在视觉SLAM中，这个过程可以表述为：已知相机内参$ K $，相机观测到的目标物坐标$ P_w $，目标物距离相机的距离$ s $以及它在图像上的像素坐标$ P_{uv} $，求解机器人的位姿$ T $。</p>
-<p>当然，由于观测数据同样受噪声影响，最终得到的位姿也不是准确的，还需要通过一些处理来减小误差。</p>
-]]></content>
-      <categories>
-        <category>视觉SLAM</category>
-      </categories>
-      <tags>
-        <tag>slam</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>ROS中使用ddynamicReconfigure</title>
     <url>/2020/09/05/ros-zhong-shi-yong-ddynamicreconfigure/</url>
     <content><![CDATA[<h1 id="ROS中使用ddynamicReconfigure"><a href="#ROS中使用ddynamicReconfigure" class="headerlink" title="ROS中使用ddynamicReconfigure"></a>ROS中使用ddynamicReconfigure</h1><h2 id="关于ddynamicReconfigure类"><a href="#关于ddynamicReconfigure类" class="headerlink" title="关于ddynamicReconfigure类"></a>关于ddynamicReconfigure类</h2><p>The DDynamicReconfigure class allows to use ROS dynamic reconfigure without the need to write a custom cpf file, <strong>variables are registered and exposed at run time</strong>.  Modification of the variables is done through a variable pointer or through a callback function.</p>
@@ -425,6 +394,37 @@ int main(int argc, char **argv) {
       </categories>
       <tags>
         <tag>ROS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SLAM问题的数学表述</title>
+    <url>/2021/02/05/slam-wen-ti-de-shu-xue-biao-shu/</url>
+    <content><![CDATA[<h1 id="SLAM问题的数学表述"><a href="#SLAM问题的数学表述" class="headerlink" title="SLAM问题的数学表述"></a>SLAM问题的数学表述</h1><blockquote>
+<p>本文是作者对于SLAM问题数学表述的一些理解，如有错误，非常非常非常欢迎指正！</p>
+</blockquote>
+<h2 id="经典SLAM模型"><a href="#经典SLAM模型" class="headerlink" title="经典SLAM模型"></a>经典SLAM模型</h2><p>经典SLAM模型由一个<strong>运动方程</strong>和一个<strong>观测方程</strong>构成，如下所示：<br>$$<br>\begin{cases}<br>x_k &amp;= \ f(x_{k-1},u_k,w_k) \\<br>z_{k,j} &amp;= \ h(y_j,x_k,v_{k,j})<br>\end{cases}<br>$$<br>有时候也会写成下面这样的形式：<br>$$<br>\begin{cases}<br>x_k &amp;= \ f(x_{k-1},u_k) +w_k \\<br>z_{k,j} &amp;= \ h(y_j,x_k)+v_{k,j}<br>\end{cases}<br>$$<br>这两种形式本质上都是一样的。其中，$ x_k $表示第k次的位置或者位姿，$ u_k $表示第k次传感器的读数或者输入，$ w_k $表示第k次运动过程中的噪声；而$ y_j $为观测到的路标点j，$ z_{k,j} $则表示第k次观测中对于路标点j所得到的观测结果，$ v_{k,j} $为本次观测过程中的噪声。而上面的函数 $ f $ 和 $ h $ ，需要根据具体的情况来确定。</p>
+<p>之后，我们将以视觉SLAM为例来更深入的理解SLAM的数学表述。</p>
+<h2 id="针孔相机模型"><a href="#针孔相机模型" class="headerlink" title="针孔相机模型"></a>针孔相机模型</h2><p>考虑到视觉SLAM的传感器是相机，并且通常符合针孔相机模型。所以在继续探讨之前，我们将对针孔相机模型做一个简单的介绍。</p>
+<h3 id="从相机坐标系到图像坐标系"><a href="#从相机坐标系到图像坐标系" class="headerlink" title="从相机坐标系到图像坐标系"></a>从相机坐标系到图像坐标系</h3><p>如下图，相机坐标系下的一点$ P(X, Y, Z) $，通过小孔成像在相机的物理成像平面上，记为$ P’(X’, Y’) $。</p>
+<p><img src="/images/slam-notes/28.png"></p>
+<p>我们能够很容易的得出以下结论：<br>$$<br>\frac Zf=- \frac X{X’}=- \frac Y{Y’}<br>$$<br>由于我们通常看到的像都是正的，并且为了公式的简洁，我们对上式加以整理，得到：<br>$$<br>X’=f \frac XZ \\<br>Y’=f \frac YZ<br>$$</p>
+<h3 id="从图像坐标系到像素坐标系"><a href="#从图像坐标系到像素坐标系" class="headerlink" title="从图像坐标系到像素坐标系"></a>从图像坐标系到像素坐标系</h3><p>事实上，计算机看到的图像都是由像素构成的，从图像坐标系到像素坐标系还需要经过一次转化。这里我们记像素坐标为$ P’’(u,v) $。<br>$$<br>\begin{cases}<br>u=\alpha X’+c_x \\<br>v=\beta Y’+c_y<br>\end{cases}<br>$$<br>其中$ \alpha $和$ \beta $分别表示x轴和y轴的缩放系数，而$ c_x $和$ c_y $则表示平移量。</p>
+<p>我们将之前得到的结论代入上式，可以得到：<br>$$<br>\begin{cases}<br>u=f_x\frac XZ+c_x \\<br>v=f_y\frac YZ+c_y<br>\end{cases}<br>$$<br>其矩阵形式可以表示为：<br>$$<br>\begin{pmatrix} u\\v\\1 \end{pmatrix}=\frac1Z\begin{pmatrix}f_x &amp; 0 &amp; c_x \\ 0 &amp; f_y &amp; c_y\\0 &amp; 0 &amp; 1 \end{pmatrix}<br>\begin{pmatrix}X\\Y\\Z\end{pmatrix}<br>\overset{\text{def}}{=}\frac 1ZKP<br>$$<br>但我们通常使用下面的公式来表示，它看上去更简洁：<br>$$<br>Z\begin{pmatrix} u\\v\\1 \end{pmatrix}=\begin{pmatrix}f_x &amp; 0 &amp; c_x \\ 0 &amp; f_y &amp; c_y\\0 &amp; 0 &amp; 1 \end{pmatrix}<br>\begin{pmatrix}X\\Y\\Z\end{pmatrix}<br>\overset{\text{def}}{=}KP<br>$$<br>左边的是齐次坐标，而右边的是非齐次坐标。我们把中间的矩阵称为内参数，记为K，内参通常在相机生产之后就已经固定，我们可以通过查询或者标定获得相机的内参。</p>
+<h3 id="从世界坐标系到相机坐标系"><a href="#从世界坐标系到相机坐标系" class="headerlink" title="从世界坐标系到相机坐标系"></a>从世界坐标系到相机坐标系</h3><p>上面我们仅仅描述了物体从相机坐标系到像素坐标系的转化。而在SLAM中，我们通常需要设置一个世界坐标系以描述相机或机器人的位置信息。因此从物体被观测，再到获得观测结果，即物体的像素坐标，中间还有一个转化过程。我们使用如下的一个式子进行描述：<br>$$<br>ZP_{uv}=Z\begin{pmatrix} u\\v\\1 \end{pmatrix}=KP=K(RP_w+t)=KTP_w<br>$$<br>这里，$ R $是旋转矩阵，$ t $是平移矩阵，$ T= \begin{pmatrix} R &amp; t \\ 0 &amp; 1 \end{pmatrix} $。可以理解为使用世界坐标系描述的点$ P_w $经过旋转变化和平移变化，得到了使用相机坐标系描述的点$ P $。</p>
+<p><strong>其中R，t 或T被称为外参，而外参正是SLAM估计的目标。</strong></p>
+<h2 id="更具体的数学表述"><a href="#更具体的数学表述" class="headerlink" title="更具体的数学表述"></a>更具体的数学表述</h2><p>再回到最开始提到的运动方程和观测方程：<br>$$<br>\begin{cases}<br>x_k &amp;= \ f(x_{k-1},u_k) +w_k \\<br>z_{k,j} &amp;= \ h(y_j,x_k)+v_{k,j}<br>\end{cases}<br>$$</p>
+<p>我们知道机器人有六个自由度，因此我们可以把$ x_k $理解为第k次观测时机器人的位姿，它是六维的，我们可以用向量表示，也可以使用变换矩阵表示，即上面的$ T $（可以认为当前机器人的位姿是由机器人在原点经过$ R $旋转和$ t $平移得到的）。此时运动方程描述的是机器人在第k-1次观测后，对其传感器输入$ u_k $，使机器人的位姿从$ x_{k-1} $变换到了$ x_k $，而$ w_k $则是此次运动中的噪声。</p>
+<p>而我们上面讲的针孔相机模型，实际上就是视觉SLAM中的观测模型。公式中$ y_j $就是针孔相机模型中我们观测的点$ P_w $，表示世界坐标系下路标点j的坐标，而$ z_{k,j} $就是观测的最终结果——像素坐标$ P_{uv} $。$ x_k $既是机器人的位姿，实际上也是模型中的外参$ T $。$ v_{k,j} $则是此次观测中的噪声。</p>
+<p>至此，我们可以用一种更具体的形式重写上面的运动方程和观测方程：<br>$$<br>\begin{cases}<br>T_k &amp;= \ f(T_{k-1},u_k) +w_k \\<br>s_j P_{uv(k,j)} &amp;= \ K(R_kP_{w(j)}+t_k)+v_{k,j}=KT_kP_{w(j)}+v_{k,j}<br>\end{cases}<br>$$<br>其中$ s_j $是路标点j到相机光心的距离。</p>
+<h2 id="对SLAM问题的总结"><a href="#对SLAM问题的总结" class="headerlink" title="对SLAM问题的总结"></a>对SLAM问题的总结</h2><p>通常，由于各种复杂因素的影响，我们无法直接求解机器人实际的运动方程，也无法通过理论上的运动方程精确计算出机器人的位姿，因此我们通过求解观测方程来相对精确地计算机器人的位置信息。</p>
+<p>在视觉SLAM中，这个过程可以表述为：已知相机内参$ K $，相机观测到的目标物坐标$ P_w $，目标物距离相机的距离$ s $以及它在图像上的像素坐标$ P_{uv} $，求解机器人的位姿$ T $。</p>
+<p>当然，由于观测数据同样受噪声影响，最终得到的位姿也不是准确的，还需要通过一些处理来减小误差。</p>
+]]></content>
+      <categories>
+        <category>视觉SLAM</category>
+      </categories>
+      <tags>
+        <tag>slam</tag>
       </tags>
   </entry>
   <entry>
@@ -869,7 +869,7 @@ int main(int argc,char** argv)
 </tr>
 <tr>
 <td>研究经历</td>
-<td>足球基地人基地V5++团队成员；中国机器人大赛无人机挑战赛无人机快递项目亚军</td>
+<td>足球基地人基地V5++团队成员；中国机器人大赛无人机挑战赛无人机快递项目季军</td>
 </tr>
 <tr>
 <td>目标高校</td>
@@ -911,116 +911,6 @@ int main(int argc,char** argv)
       </categories>
       <tags>
         <tag>出国留学</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>理解SVM的三层境界</title>
-    <url>/2021/02/23/li-jie-svm-de-san-ceng-jing-jie/</url>
-    <content><![CDATA[<h1 id="理解SVM的三层境界"><a href="#理解SVM的三层境界" class="headerlink" title="理解SVM的三层境界"></a>理解SVM的三层境界</h1><p>SVM是什么? 先来看看维基百科上对<a href="https://link.zhihu.com/?target=https://zh.wikipedia.org/wiki/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA">SVM的定义</a>:</p>
-<blockquote>
-<p>支持向量机（英语：support vector machine，常简称为SVM，又名支持向量网络）是在分类与回归分析中分析数据的监督式学习模型与相关的学习算法。给定一组训练实例，每个训练实例被标记为属于两个类别中的一个或另一个，SVM训练算法创建一个将新的实例分配给两个类别之一的模型，使其成为非概率二元线性分类器。SVM模型是将实例表示为空间中的点，这样映射就使得单独类别的实例被尽可能宽的明显的间隔分开。然后，将新的实例映射到同一空间，并基于它们落在间隔的哪一侧来预测所属类别。</p>
-</blockquote>
-<p>如果从未接触SVM的话，维基的这一大段解释肯定会让你一头雾水。简单点讲，SVM就是一种二类分类模型，他的基本模型是的定义在特征空间上的<strong>间隔最大</strong>的线性分类器，SVM的学习策略就是间隔最大化。</p>
-<p>下面是我从网上找到的一篇讲解SVM比较好的文章：</p>
-<object data="/pdf/理解SVM的三层境界.pdf" type="application/pdf" width="100%" height="1000">
-
-</object>]]></content>
-      <categories>
-        <category>计算机视觉</category>
-      </categories>
-      <tags>
-        <tag>OpenCV</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>类的六个默认的成员函数</title>
-    <url>/2020/08/21/lei-de-liu-ge-mo-ren-de-cheng-yuan-han-shu/</url>
-    <content><![CDATA[<h1 id="类的六个默认的成员函数"><a href="#类的六个默认的成员函数" class="headerlink" title="类的六个默认的成员函数"></a>类的六个默认的成员函数</h1><h2 id="类的6个默认的成员函数包括："><a href="#类的6个默认的成员函数包括：" class="headerlink" title="类的6个默认的成员函数包括："></a>类的6个默认的成员函数包括：</h2><p>构造函数、析构函数、拷贝构造函数、赋值运算符重载函数、取地址操作符重载、const修饰的取地址操作符重载。</p>
-<h3 id="（一）构造函数"><a href="#（一）构造函数" class="headerlink" title="（一）构造函数"></a>（一）构造函数</h3><p>构造函数，顾名思义，为对象分配空间，进行初始化。它是一种特殊的成员函数，具有以下特点:</p>
-<ol>
-<li><p>函数名与类名相同。</p>
-</li>
-<li><p>无返回值。</p>
-</li>
-<li><p>构造对象的时候系统会自动调用构造函数。</p>
-</li>
-<li><p>可以重载。</p>
-</li>
-<li><p>可以在类中定义，也可以在类外定义。</p>
-</li>
-<li><p>如果类中没有给出构造函数，编译器会自动产生一个缺省的构造函数，如果类中有构造函数，编译器就不会产生缺省构造函数。</p>
-</li>
-<li><p>全缺省的构造函数和无参的构造函数只能有一个，否则调用的时候就会产生冲突。</p>
-</li>
-<li><p>没有this指针。因为构造函数才是创建对象的，没有创建对象就不会有对象的首地址。</p>
-</li>
-</ol>
-<p>构造函数，说来就是给成员变量进行初始化。而初始化却有两种方法：初始化列表、构造函数函数体内赋值。尽量使用初始化列表，因为它更高效。</p>
-<h4 id="有些成员变量必须再初始化列表中初始化，比如："><a href="#有些成员变量必须再初始化列表中初始化，比如：" class="headerlink" title="有些成员变量必须再初始化列表中初始化，比如："></a>有些成员变量必须再初始化列表中初始化，比如：</h4><ol>
-<li><p>常量成员变量。（常量创建时必须初始化，因为对于一个常量，我们给它赋值，是不对的）</p>
-</li>
-<li><p>引用类型成员变量。（引用创建时必须初始化）</p>
-</li>
-<li><p>没有缺省构造函数的类成员变量。（如果构造函数的参数列表中有一个类的对象，并且该对象的类里没有缺省参数的构造函数时，要是不使用初始化列表，参数中会调用无参或者全缺省的构造函数，而那个类中又没有。）</p>
-</li>
-</ol>
-<h3 id="（二）析构函数"><a href="#（二）析构函数" class="headerlink" title="（二）析构函数"></a>（二）析构函数</h3><h4 id="析构函数是一种特殊的成员函数，具有以下特点："><a href="#析构函数是一种特殊的成员函数，具有以下特点：" class="headerlink" title="析构函数是一种特殊的成员函数，具有以下特点："></a>析构函数是一种特殊的成员函数，具有以下特点：</h4><ol>
-<li><p>析构函数函数名是在类名加上字符 ~ 。</p>
-</li>
-<li><p>无参数无返回值（但有this指针）。</p>
-</li>
-<li><p>一个类有且只有一个析构函数，所以肯定不能重载。若未显示定义，系统会自动生成缺省的析构函数。</p>
-</li>
-<li><p>对象生命周期结束时，C++编译系统系统自动调用析构函数。</p>
-</li>
-<li><p>注意析构函数体内并不是删除对象，而是做一些清理工作。（比如我们在构造函数中动态开辟过一段空间，函数结束后需要释放，而系统自动生成的析构函数才不管内存释放呢，所以需要人为地写出析构函数）</p>
-</li>
-</ol>
-<p>注意：对象生命周期结束后，后构造的对象先释放。</p>
-<h3 id="（三）拷贝构造函数"><a href="#（三）拷贝构造函数" class="headerlink" title="（三）拷贝构造函数"></a>（三）拷贝构造函数</h3><p>用已有的对象创建一个新的对象。</p>
-<p>创建对象时使用同类对象来进行初始化，这时所用的构造函数就是拷贝构造函数（Copy  Constructor）。拷贝构造函数也是构造函数，但它只有一个参数，这个参数只能是本类的一个对象，而且采用对象的常引用形式。拷贝构造函数的作用就是将实参对象的各成员值一一赋给新的对象中对应的成员。</p>
-<p>该函数的参数是一个常引用，如果不是引用，形参是实参的一份临时拷贝，由于两者都是对象，此时就会调用自己的拷贝构造函数，陷入无限递归中…….</p>
-<h4 id="拷贝构造函数的特征"><a href="#拷贝构造函数的特征" class="headerlink" title="拷贝构造函数的特征"></a>拷贝构造函数的特征</h4><p> （1）拷贝构造函数其实是一个构造函数的重载。<br> （2）拷贝构造函数的参数必须使用引用传参，使用传参方式会引发无穷递归调用。<br> （3）若为显示定义，系统默认生成缺省的拷贝构造函数，缺省的拷贝构造函数会按照成员的声明顺序依次拷贝类成员进行初始化</p>
-<h4 id="调用拷贝构造函数的两种方法："><a href="#调用拷贝构造函数的两种方法：" class="headerlink" title="调用拷贝构造函数的两种方法："></a>调用拷贝构造函数的两种方法：</h4><ol>
-<li><p>代入法：</p>
-<p>Person p2(p1);</p>
-</li>
-<li><p>赋值法：</p>
-<p>Person p2 = p1;</p>
-</li>
-</ol>
-<h4 id="为什么这里的对象可以直接访问私有成员变量？"><a href="#为什么这里的对象可以直接访问私有成员变量？" class="headerlink" title="为什么这里的对象可以直接访问私有成员变量？"></a>为什么这里的对象可以直接访问私有成员变量？</h4><p> 1）在类的成员函数里可以直接访问同类对象的私有或保护的成员。<br> 2）C++的访问限定符是以类为单位的，即：在这个单位内的成员可以互相访问。</p>
-<h3 id="（四）赋值运算符重载函数"><a href="#（四）赋值运算符重载函数" class="headerlink" title="（四）赋值运算符重载函数"></a>（四）赋值运算符重载函数</h3><p>用一个对象修改已经存在对象的内容，不是去创建新的对象，修改之后，两个对象的内容一致</p>
-<blockquote>
-<ol>
-<li>可以通过检查是否给自己赋值，进行优化</li>
-<li><strong>如果需要连续赋值，返回值不能是void，一般为引用类型</strong></li>
-<li>*<em>返回值一般是 <em>this</em></em></li>
-<li>编译器默认生成的赋值运算符为字节拷贝，即浅拷贝，如果资源需要拷贝，需要显示定义，完成深拷贝</li>
-</ol>
-<p>=调用：如果对象都存在，调用赋值运算符重载函数</p>
-<p>​              如果左边对象不存在，调用拷贝构造创建左边对象</p>
-</blockquote>
-<p><em>赋值是从右向左进行的</em></p>
-<p>如果不写，编译器会自动生成，默认生成的也是字节拷贝，浅拷贝</p>
-<p>如果当前类中有资源，则必须显示定义运算符重载函数，完成深拷贝</p>
-<h4 id="普通运算符重载函数"><a href="#普通运算符重载函数" class="headerlink" title="普通运算符重载函数"></a>普通运算符重载函数</h4><blockquote>
-<ol>
-<li>不能创建新的操作符，如operator@</li>
-<li>重载操作符必须有一个类类型或者枚举类型的操作符</li>
-<li>用于内置类型的操作符，其含义不能改变</li>
-<li>运算符重载函数如果是成员函数，则参数的个数比运算符需要的个数少一个，这里编译器会传入this指针作为第一个参数</li>
-<li>普通的运算符重载函数，参数的个数和运算符需要的个数一致</li>
-</ol>
-</blockquote>
-<p><strong>.*（成员指针访问运算符） ,  ::  ,  sizeof  ,  ? :  ,  .   五个运算符不能被重载</strong></p>
-<h3 id="（五）取地址运算符重载函数-const取地址运算符重载函数：获取对象的地址"><a href="#（五）取地址运算符重载函数-const取地址运算符重载函数：获取对象的地址" class="headerlink" title="（五）取地址运算符重载函数 / const取地址运算符重载函数：获取对象的地址**"></a>（五）取地址运算符重载函数 / const取地址运算符重载函数：获取对象的地址**</h3><p>一般不需要显示定义，直接使用编译器自动生成的即可</p>
-]]></content>
-      <categories>
-        <category>C++基础知识</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
       </tags>
   </entry>
   <entry>
@@ -1191,6 +1081,116 @@ int main(int argc,char** argv)
       </categories>
       <tags>
         <tag>slam</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>理解SVM的三层境界</title>
+    <url>/2021/02/23/li-jie-svm-de-san-ceng-jing-jie/</url>
+    <content><![CDATA[<h1 id="理解SVM的三层境界"><a href="#理解SVM的三层境界" class="headerlink" title="理解SVM的三层境界"></a>理解SVM的三层境界</h1><p>SVM是什么? 先来看看维基百科上对<a href="https://link.zhihu.com/?target=https://zh.wikipedia.org/wiki/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA">SVM的定义</a>:</p>
+<blockquote>
+<p>支持向量机（英语：support vector machine，常简称为SVM，又名支持向量网络）是在分类与回归分析中分析数据的监督式学习模型与相关的学习算法。给定一组训练实例，每个训练实例被标记为属于两个类别中的一个或另一个，SVM训练算法创建一个将新的实例分配给两个类别之一的模型，使其成为非概率二元线性分类器。SVM模型是将实例表示为空间中的点，这样映射就使得单独类别的实例被尽可能宽的明显的间隔分开。然后，将新的实例映射到同一空间，并基于它们落在间隔的哪一侧来预测所属类别。</p>
+</blockquote>
+<p>如果从未接触SVM的话，维基的这一大段解释肯定会让你一头雾水。简单点讲，SVM就是一种二类分类模型，他的基本模型是的定义在特征空间上的<strong>间隔最大</strong>的线性分类器，SVM的学习策略就是间隔最大化。</p>
+<p>下面是我从网上找到的一篇讲解SVM比较好的文章：</p>
+<object data="/pdf/理解SVM的三层境界.pdf" type="application/pdf" width="100%" height="1000">
+
+</object>]]></content>
+      <categories>
+        <category>计算机视觉</category>
+      </categories>
+      <tags>
+        <tag>OpenCV</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>类的六个默认的成员函数</title>
+    <url>/2020/08/21/lei-de-liu-ge-mo-ren-de-cheng-yuan-han-shu/</url>
+    <content><![CDATA[<h1 id="类的六个默认的成员函数"><a href="#类的六个默认的成员函数" class="headerlink" title="类的六个默认的成员函数"></a>类的六个默认的成员函数</h1><h2 id="类的6个默认的成员函数包括："><a href="#类的6个默认的成员函数包括：" class="headerlink" title="类的6个默认的成员函数包括："></a>类的6个默认的成员函数包括：</h2><p>构造函数、析构函数、拷贝构造函数、赋值运算符重载函数、取地址操作符重载、const修饰的取地址操作符重载。</p>
+<h3 id="（一）构造函数"><a href="#（一）构造函数" class="headerlink" title="（一）构造函数"></a>（一）构造函数</h3><p>构造函数，顾名思义，为对象分配空间，进行初始化。它是一种特殊的成员函数，具有以下特点:</p>
+<ol>
+<li><p>函数名与类名相同。</p>
+</li>
+<li><p>无返回值。</p>
+</li>
+<li><p>构造对象的时候系统会自动调用构造函数。</p>
+</li>
+<li><p>可以重载。</p>
+</li>
+<li><p>可以在类中定义，也可以在类外定义。</p>
+</li>
+<li><p>如果类中没有给出构造函数，编译器会自动产生一个缺省的构造函数，如果类中有构造函数，编译器就不会产生缺省构造函数。</p>
+</li>
+<li><p>全缺省的构造函数和无参的构造函数只能有一个，否则调用的时候就会产生冲突。</p>
+</li>
+<li><p>没有this指针。因为构造函数才是创建对象的，没有创建对象就不会有对象的首地址。</p>
+</li>
+</ol>
+<p>构造函数，说来就是给成员变量进行初始化。而初始化却有两种方法：初始化列表、构造函数函数体内赋值。尽量使用初始化列表，因为它更高效。</p>
+<h4 id="有些成员变量必须再初始化列表中初始化，比如："><a href="#有些成员变量必须再初始化列表中初始化，比如：" class="headerlink" title="有些成员变量必须再初始化列表中初始化，比如："></a>有些成员变量必须再初始化列表中初始化，比如：</h4><ol>
+<li><p>常量成员变量。（常量创建时必须初始化，因为对于一个常量，我们给它赋值，是不对的）</p>
+</li>
+<li><p>引用类型成员变量。（引用创建时必须初始化）</p>
+</li>
+<li><p>没有缺省构造函数的类成员变量。（如果构造函数的参数列表中有一个类的对象，并且该对象的类里没有缺省参数的构造函数时，要是不使用初始化列表，参数中会调用无参或者全缺省的构造函数，而那个类中又没有。）</p>
+</li>
+</ol>
+<h3 id="（二）析构函数"><a href="#（二）析构函数" class="headerlink" title="（二）析构函数"></a>（二）析构函数</h3><h4 id="析构函数是一种特殊的成员函数，具有以下特点："><a href="#析构函数是一种特殊的成员函数，具有以下特点：" class="headerlink" title="析构函数是一种特殊的成员函数，具有以下特点："></a>析构函数是一种特殊的成员函数，具有以下特点：</h4><ol>
+<li><p>析构函数函数名是在类名加上字符 ~ 。</p>
+</li>
+<li><p>无参数无返回值（但有this指针）。</p>
+</li>
+<li><p>一个类有且只有一个析构函数，所以肯定不能重载。若未显示定义，系统会自动生成缺省的析构函数。</p>
+</li>
+<li><p>对象生命周期结束时，C++编译系统系统自动调用析构函数。</p>
+</li>
+<li><p>注意析构函数体内并不是删除对象，而是做一些清理工作。（比如我们在构造函数中动态开辟过一段空间，函数结束后需要释放，而系统自动生成的析构函数才不管内存释放呢，所以需要人为地写出析构函数）</p>
+</li>
+</ol>
+<p>注意：对象生命周期结束后，后构造的对象先释放。</p>
+<h3 id="（三）拷贝构造函数"><a href="#（三）拷贝构造函数" class="headerlink" title="（三）拷贝构造函数"></a>（三）拷贝构造函数</h3><p>用已有的对象创建一个新的对象。</p>
+<p>创建对象时使用同类对象来进行初始化，这时所用的构造函数就是拷贝构造函数（Copy  Constructor）。拷贝构造函数也是构造函数，但它只有一个参数，这个参数只能是本类的一个对象，而且采用对象的常引用形式。拷贝构造函数的作用就是将实参对象的各成员值一一赋给新的对象中对应的成员。</p>
+<p>该函数的参数是一个常引用，如果不是引用，形参是实参的一份临时拷贝，由于两者都是对象，此时就会调用自己的拷贝构造函数，陷入无限递归中…….</p>
+<h4 id="拷贝构造函数的特征"><a href="#拷贝构造函数的特征" class="headerlink" title="拷贝构造函数的特征"></a>拷贝构造函数的特征</h4><p> （1）拷贝构造函数其实是一个构造函数的重载。<br> （2）拷贝构造函数的参数必须使用引用传参，使用传参方式会引发无穷递归调用。<br> （3）若为显示定义，系统默认生成缺省的拷贝构造函数，缺省的拷贝构造函数会按照成员的声明顺序依次拷贝类成员进行初始化</p>
+<h4 id="调用拷贝构造函数的两种方法："><a href="#调用拷贝构造函数的两种方法：" class="headerlink" title="调用拷贝构造函数的两种方法："></a>调用拷贝构造函数的两种方法：</h4><ol>
+<li><p>代入法：</p>
+<p>Person p2(p1);</p>
+</li>
+<li><p>赋值法：</p>
+<p>Person p2 = p1;</p>
+</li>
+</ol>
+<h4 id="为什么这里的对象可以直接访问私有成员变量？"><a href="#为什么这里的对象可以直接访问私有成员变量？" class="headerlink" title="为什么这里的对象可以直接访问私有成员变量？"></a>为什么这里的对象可以直接访问私有成员变量？</h4><p> 1）在类的成员函数里可以直接访问同类对象的私有或保护的成员。<br> 2）C++的访问限定符是以类为单位的，即：在这个单位内的成员可以互相访问。</p>
+<h3 id="（四）赋值运算符重载函数"><a href="#（四）赋值运算符重载函数" class="headerlink" title="（四）赋值运算符重载函数"></a>（四）赋值运算符重载函数</h3><p>用一个对象修改已经存在对象的内容，不是去创建新的对象，修改之后，两个对象的内容一致</p>
+<blockquote>
+<ol>
+<li>可以通过检查是否给自己赋值，进行优化</li>
+<li><strong>如果需要连续赋值，返回值不能是void，一般为引用类型</strong></li>
+<li>*<em>返回值一般是 <em>this</em></em></li>
+<li>编译器默认生成的赋值运算符为字节拷贝，即浅拷贝，如果资源需要拷贝，需要显示定义，完成深拷贝</li>
+</ol>
+<p>=调用：如果对象都存在，调用赋值运算符重载函数</p>
+<p>​              如果左边对象不存在，调用拷贝构造创建左边对象</p>
+</blockquote>
+<p><em>赋值是从右向左进行的</em></p>
+<p>如果不写，编译器会自动生成，默认生成的也是字节拷贝，浅拷贝</p>
+<p>如果当前类中有资源，则必须显示定义运算符重载函数，完成深拷贝</p>
+<h4 id="普通运算符重载函数"><a href="#普通运算符重载函数" class="headerlink" title="普通运算符重载函数"></a>普通运算符重载函数</h4><blockquote>
+<ol>
+<li>不能创建新的操作符，如operator@</li>
+<li>重载操作符必须有一个类类型或者枚举类型的操作符</li>
+<li>用于内置类型的操作符，其含义不能改变</li>
+<li>运算符重载函数如果是成员函数，则参数的个数比运算符需要的个数少一个，这里编译器会传入this指针作为第一个参数</li>
+<li>普通的运算符重载函数，参数的个数和运算符需要的个数一致</li>
+</ol>
+</blockquote>
+<p><strong>.*（成员指针访问运算符） ,  ::  ,  sizeof  ,  ? :  ,  .   五个运算符不能被重载</strong></p>
+<h3 id="（五）取地址运算符重载函数-const取地址运算符重载函数：获取对象的地址"><a href="#（五）取地址运算符重载函数-const取地址运算符重载函数：获取对象的地址" class="headerlink" title="（五）取地址运算符重载函数 / const取地址运算符重载函数：获取对象的地址**"></a>（五）取地址运算符重载函数 / const取地址运算符重载函数：获取对象的地址**</h3><p>一般不需要显示定义，直接使用编译器自动生成的即可</p>
+]]></content>
+      <categories>
+        <category>C++基础知识</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
       </tags>
   </entry>
   <entry>
